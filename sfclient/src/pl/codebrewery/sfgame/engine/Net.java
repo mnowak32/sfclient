@@ -7,7 +7,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 
-import pl.codebrewery.sfgame.model.GameData;
+import pl.codebrewery.sfgame.model.Game;
 
 public class Net {
 
@@ -15,7 +15,12 @@ public class Net {
 	//http://s1.sfgame.pl/request.php?req=Y5K2B4K42547d64A6066442485032S70503105577&random=%2&rnd=10469360351367927091655
 	
 	private String getRandom() {
-		return String.format("%d%d", Math.round(Math.random() * 0x77359400), GameData.I.getGameTime() / 1000);
+		return String.format("%d%d", Math.round(Math.random() * 0x77359400), Game.I.getGameTime() / 1000);
+	}
+	
+	public Response call(int a, String s, String... p) {
+		Request r = new Request(a, s, p);
+		return call(r);
 	}
 	
 	public Response call(Request r) {
@@ -43,7 +48,7 @@ public class Net {
 			
 			Response re = new Response();
 			if (plainResp.charAt(0) == '+') {
-				GameData.I.setNewChat(true);
+				Game.I.setNewChat(true);
 				plainResp = plainResp.substring(1);
 			}
 			

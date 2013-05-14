@@ -2,12 +2,18 @@ package pl.codebrewery.sfgame.model;
 
 import java.util.Arrays;
 
-public class GameData {
+import pl.codebrewery.sfgame.engine.Net;
+import pl.codebrewery.sfgame.engine.ResponseHandler;
+
+public class Game {
 
 	public static final String VERSION = "v1.70";
 	public static final int CONTENT_MAX = 1700;
 	
-	public static final GameData I = new GameData();
+	public static final Game I = new Game();
+	public Net net = new Net();
+	public ResponseHandler rh = new ResponseHandler();
+	
 	
 	private String login, password;
 	private String sessionId;
@@ -28,10 +34,12 @@ public class GameData {
 	private Attr str, dex, intel, endur, luck;
 	
 	private int action, actionCountdown;
-	private boolean newChat;
+	private boolean newChat = false;
 	
 	private int questTime;
 	private Quest[] quests = new Quest[3];
+	
+	private boolean beerFest;
 	
 	public static class Attr {
 		private int base, bonus, bought;
@@ -76,73 +84,73 @@ public class GameData {
 		}
 	}
 	
-	private GameData() {
+	private Game() {
 		
 	}
 
 	public void restoreFromSave(String sg) {
 		String[] saveGame = ("0/" + sg).split("/");
 
-		I.serverTime = Long.parseLong(saveGame[Const.SG_SERVER_TIME]) * 1000; //lokalnie w milisekundach
-		I.gameTime = System.currentTimeMillis();
-		I.serverDeltaT = I.serverTime - I.gameTime;
+		serverTime = Long.parseLong(saveGame[Const.SG_SERVER_TIME]) * 1000; //lokalnie w milisekundach
+		gameTime = System.currentTimeMillis();
+		serverDeltaT = serverTime - gameTime;
 		
-		I.playerId = Integer.parseInt(saveGame[Const.SG_PLAYER_ID]);
-		I.guildId = Integer.parseInt(saveGame[Const.SG_GUILD_INDEX]);
-		I.playerClass = Integer.parseInt(saveGame[Const.SG_CLASS]);
+		playerId = Integer.parseInt(saveGame[Const.SG_PLAYER_ID]);
+		guildId = Integer.parseInt(saveGame[Const.SG_GUILD_INDEX]);
+		playerClass = Integer.parseInt(saveGame[Const.SG_CLASS]);
 		int gender = Integer.parseInt(saveGame[Const.SG_GENDER]);
 		String flags = toBinStr(gender, 32);
 		
 		for (int i = 0; i < 13; i++) {
-			I.mirrorParts[i] = (flags.charAt(i + 1) == '1');
+			mirrorParts[i] = (flags.charAt(i + 1) == '1');
 		}
 		
-		I.hasMirror = (flags.charAt(23) == '1');
-		I.canRob = (flags.charAt(22) == '1');
-		I.gender = (flags.charAt(31) == '1') ? 1 : 2;
+		hasMirror = (flags.charAt(23) == '1');
+		canRob = (flags.charAt(22) == '1');
+		gender = (flags.charAt(31) == '1') ? 1 : 2;
 		
 		int mount = Integer.parseInt(saveGame[Const.SG_MOUNT]);
-		I.towerLevel = mount >> 16;
-		I.mount = mount & 0xffff;
+		towerLevel = mount >> 16;
+		mount = mount & 0xffff;
 		
-		I.level = Integer.parseInt(saveGame[Const.SG_LEVEL]);
-		I.gold = Integer.parseInt(saveGame[Const.SG_GOLD]);
-		I.shroom = Integer.parseInt(saveGame[Const.SG_MUSH]);
-		I.exp = Integer.parseInt(saveGame[Const.SG_EXP]);
-		I.expNext = Integer.parseInt(saveGame[Const.SG_EXP_FOR_NEXTLEVEL]);
+		level = Integer.parseInt(saveGame[Const.SG_LEVEL]);
+		gold = Integer.parseInt(saveGame[Const.SG_GOLD]);
+		shroom = Integer.parseInt(saveGame[Const.SG_MUSH]);
+		exp = Integer.parseInt(saveGame[Const.SG_EXP]);
+		expNext = Integer.parseInt(saveGame[Const.SG_EXP_FOR_NEXTLEVEL]);
 		
 		int base = Integer.parseInt(saveGame[Const.SG_ATTR_STAERKE]);
 		int bonus = Integer.parseInt(saveGame[Const.SG_ATTR_STAERKE_BONUS]);
 		int bought = Integer.parseInt(saveGame[Const.SG_ATTR_STAERKE_GEKAUFT]);
-		I.str = new Attr(base, bonus, bought);
+		str = new Attr(base, bonus, bought);
 		
 		base = Integer.parseInt(saveGame[Const.SG_ATTR_BEWEGLICHKEIT]);
 		bonus = Integer.parseInt(saveGame[Const.SG_ATTR_BEWEGLICHKEIT_BONUS]);
 		bought = Integer.parseInt(saveGame[Const.SG_ATTR_BEWEGLICHKEIT_GEKAUFT]);
-		I.dex = new Attr(base, bonus, bought);
+		dex = new Attr(base, bonus, bought);
 		
 		base = Integer.parseInt(saveGame[Const.SG_ATTR_INTELLIGENZ]);
 		bonus = Integer.parseInt(saveGame[Const.SG_ATTR_INTELLIGENZ_BONUS]);
 		bought = Integer.parseInt(saveGame[Const.SG_ATTR_INTELLIGENZ_GEKAUFT]);
-		I.endur = new Attr(base, bonus, bought);
+		endur = new Attr(base, bonus, bought);
 		
 		base = Integer.parseInt(saveGame[Const.SG_ATTR_AUSDAUER]);
 		bonus = Integer.parseInt(saveGame[Const.SG_ATTR_AUSDAUER_BONUS]);
 		bought = Integer.parseInt(saveGame[Const.SG_ATTR_AUSDAUER_GEKAUFT]);
-		I.intel = new Attr(base, bonus, bought);
+		intel = new Attr(base, bonus, bought);
 		
 		base = Integer.parseInt(saveGame[Const.SG_ATTR_WILLENSKRAFT]);
 		bonus = Integer.parseInt(saveGame[Const.SG_ATTR_WILLENSKRAFT_BONUS]);
 		bought = Integer.parseInt(saveGame[Const.SG_ATTR_WILLENSKRAFT_GEKAUFT]);
-		I.luck = new Attr(base, bonus, bought);
+		luck = new Attr(base, bonus, bought);
 		
-		I.action = Integer.parseInt(saveGame[Const.SG_ACTION_STATUS]);
-		I.actionCountdown = Integer.parseInt(saveGame[Const.SG_ACTION_ENDTIME]);
+		action = Integer.parseInt(saveGame[Const.SG_ACTION_STATUS]);
+		actionCountdown = Integer.parseInt(saveGame[Const.SG_ACTION_ENDTIME]);
 		
-		I.questTime = Integer.parseInt(saveGame[Const.SG_TIMEBAR]);
+		questTime = Integer.parseInt(saveGame[Const.SG_TIMEBAR]);
 		
 		for (int i = 0; i < 3; i++) { //quests
-			I.quests[i] = new Quest(
+			quests[i] = new Quest(
 				Integer.parseInt(saveGame[Const.SG_QUEST_OFFER_LEVEL1 + i]),
 				Integer.parseInt(saveGame[Const.SG_QUEST_OFFER_TYPE1 + i]),
 				Integer.parseInt(saveGame[Const.SG_QUEST_OFFER_ENEMY1 + i]),
@@ -159,7 +167,7 @@ public class GameData {
 			return;
 		}
 		
-		I.guildName = parts[0];
+		guildName = parts[0];
 	}
 	
 	private static String toBinStr(int v, int bits) {
@@ -231,10 +239,10 @@ public class GameData {
 	public String toString() {
 		return String
 			.format(
-				"GameData [login=%s, password=%s, sessionId=%s, gameTime=%s, playerId=%s, guildId=%s, playerClass=%s, gender=%s, guildName=%s, mirrorParts=%s, hasMirror=%s, canRob=%s, towerLevel=%s, mount=%s, level=%s, gold=%s, shroom=%s, exp=%s, expNext=%s, str=%s, dex=%s, intel=%s, endur=%s, luck=%s, action=%s, actionCountdown=%s]",
-				login, password, sessionId, gameTime, playerId, guildId, playerClass, gender, guildName,
+				"GameData [login=%s, password=%s, sessionId=%s, gameTime=%s, serverTime=%s, serverDeltaT=%s, playerId=%s, guildId=%s, playerClass=%s, gender=%s, guildName=%s, mirrorParts=%s, hasMirror=%s, canRob=%s, towerLevel=%s, mount=%s, level=%s, gold=%s, shroom=%s, exp=%s, expNext=%s, str=%s, dex=%s, intel=%s, endur=%s, luck=%s, action=%s, actionCountdown=%s, newChat=%s, questTime=%s, quests=%s, beerFest=%s]",
+				login, password, sessionId, gameTime, serverTime, serverDeltaT, playerId, guildId, playerClass, gender, guildName,
 				Arrays.toString(mirrorParts), hasMirror, canRob, towerLevel, mount, level, gold, shroom, exp, expNext, str, dex,
-				intel, endur, luck, action, actionCountdown);
+				intel, endur, luck, action, actionCountdown, newChat, questTime, Arrays.toString(quests), beerFest);
 	}
 
 	public boolean[] getMirrorParts() {
@@ -427,6 +435,14 @@ public class GameData {
 
 	public void setQuests(Quest[] quests) {
 		this.quests = quests;
+	}
+
+	public boolean isBeerFest() {
+		return beerFest;
+	}
+
+	public void setBeerFest(boolean beerFest) {
+		this.beerFest = beerFest;
 	}
 
 	
