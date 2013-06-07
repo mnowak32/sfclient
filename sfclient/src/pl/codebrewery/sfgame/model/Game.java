@@ -41,6 +41,9 @@ public class Game {
 	
 	private boolean beerFest;
 	
+	private boolean[] album;
+	private int albumItems;
+	
 	public static class Attr {
 		private int base, bonus, bought;
 		
@@ -443,6 +446,22 @@ public class Game {
 
 	public void setBeerFest(boolean beerFest) {
 		this.beerFest = beerFest;
+	}
+
+	public boolean[] getAlbum() {
+		return album;
+	}
+
+	public void setAlbum(boolean[] album) {
+		this.album = album;
+	}
+
+	public int getAlbumItems() {
+		return albumItems;
+	}
+
+	public void setAlbumItems(int albumItems) {
+		this.albumItems = albumItems;
 	}
 
 	

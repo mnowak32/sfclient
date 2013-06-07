@@ -1,9 +1,12 @@
 package pl.codebrewery.sfgame.model;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 public class ChatLine {
 
 	public enum Type {
-		GOLD("złoto", "złota", "złota"), SHROOM("grzyb", "grzyby", "grzybów"), CHAT, OTHER;
+		GOLD("złoto", "złota", "złota"), SHROOM("grzyb", "grzyby", "grzybów"), CHAT, OTHER, DUNGEON, RESTART;
 		private String one, two, five;
 		private Type() {
 			
@@ -35,16 +38,23 @@ public class ChatLine {
 	private String line;
 	
 	public ChatLine(String in) {
+//		System.out.println(in);
 		if (in.startsWith("#")) {
 			String[] parts = in.split("#");
-			int quantity = Integer.parseInt(parts[3]);
-			if (parts[1].equals("dm")) {
-				type = Type.SHROOM;
-			} else if (parts[1].equals("dg")) {
-				type = Type.GOLD;
+			if (parts[1].equals("dm") || parts[1].equals("dg")) {
+				int quantity = Integer.parseInt(parts[3]);
+				type = parts[1].equals("dm") ? Type.SHROOM : Type.GOLD;
 				quantity /= 100;
+				line = parts[2] + " - " + quantity + " " + type.getQuant(quantity);
+			} else if (parts[1].equals("du")) {
+				type = Type.DUNGEON;
+				line = parts[2] + " has finished level " + parts[4] + " of dungeon #" + parts[3];
+			} else if (parts[1].equals("sr")) {
+				long ts = Long.parseLong(parts[2]) * 1000; 
+				Date d = new Date();
+				d.setTime(ts);
+				line = "server restart @ " + (new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(d));
 			}
-			line = parts[2] + " - " + quantity + " " + type.getQuant(quantity);
 		} else {
 			line = in;
 		}

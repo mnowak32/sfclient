@@ -3,18 +3,21 @@ package pl.codebrewery.sfgame.engine;
 import java.util.Arrays;
 import java.util.LinkedList;
 
+import javax.xml.bind.DatatypeConverter;
+
 import org.apache.commons.lang3.StringUtils;
 
-import pl.codebrewery.sfgame.Cli;
+import pl.codebrewery.sfgame.interfaces.Cli;
 import pl.codebrewery.sfgame.model.ChatLine;
 import pl.codebrewery.sfgame.model.Const;
 import pl.codebrewery.sfgame.model.Game;
 
 public class ResponseHandler {
 
-	public boolean handleResponse(final Response r, final Cli cli) {
+	public boolean handleResponse(final Response r, final Cli com) {
 		if (r == null) {
-			cli.print("Null response encountered!\n");
+			com.nullResponse();
+//			com.print("Null response encountered!\n");
 			return true;
 		}
 		
@@ -102,7 +105,27 @@ public class ResponseHandler {
 //        case Const.ERR_GUILD_RANK_WRONG:
 //            this.ErrorMessage(this.txt[this.TXT_ERROR_GUILD_RANK_WRONG]);
 //            break;
-//        case Const.RESP_ALBUM:
+        case Const.RESP_ALBUM:
+        	byte[] bytes = DatatypeConverter.parseBase64Binary(StringUtils.join(par, '/'));
+        	boolean[] album = new boolean[8 * bytes.length];
+        	for (int i = 0, p = 0; i < bytes.length; i++) {
+        		byte b = bytes[i];
+        		album[p++] = ((b & 0x80) > 0);
+        		album[p++] = ((b & 0x40) > 0);
+        		album[p++] = ((b & 0x20) > 0);
+        		album[p++] = ((b & 0x10) > 0);
+        		album[p++] = ((b & 0x08) > 0);
+        		album[p++] = ((b & 0x04) > 0);
+        		album[p++] = ((b & 0x02) > 0);
+        		album[p++] = ((b & 0x01) > 0);
+        	}
+        	gd.setAlbum(album);
+        	int albumCounter = 0;
+        	for (boolean a : album) {
+        		if (a) albumCounter++;
+        	}
+        	com.print(String.format("Album completion: #_R%d/%d#Z.\n", albumCounter, Game.CONTENT_MAX));
+        	break;
 //            tmpByteArray = Base64.decodeToByteArray(par.join("/"));
 //            bitArray = new Array();
 //            i = 0;
@@ -192,8 +215,8 @@ public class ResponseHandler {
 //            break;
         case Const.ERR_SESSION_ID_EXPIRED:
         	gd.setSessionId(null);
-        	cli.print("#RSession expired, re-logging...\n");
-        	cli.relogin();
+//        	com.print("#RSession expired, re-logging...\n");
+        	com.relogin();
         	break;
 //            this.trc("Achtung, sessionID ist abgelaufen.");
 //            this.sessionID = "";
@@ -321,7 +344,7 @@ public class ResponseHandler {
     				chat.addFirst(new ChatLine(line));
     			}
     			for (ChatLine cl : chat) {
-    				cli.print(cl.getLine() + "\n");
+    				com.print(cl.getLine() + "\n");
     			}
     			break;
         	
@@ -570,7 +593,7 @@ public class ResponseHandler {
         case Const.ACT_SCREEN_TAVERNE:
         case Const.RESP_QUEST_STOP:
 			gd.restoreFromSave(par[0]);
-			cli.print(Arrays.asList(gd.getQuests()).toString());
+			com.print(Arrays.asList(gd.getQuests()).toString());
 			break;
 //            ParseSavegame(par[0]);
 //            if (par[1]){
@@ -904,7 +927,7 @@ public class ResponseHandler {
 //            break;
         case Const.ACT_SCREEN_ARBEITEN:
 			int gold = parseInt(par[0]);
-			cli.print(String.format("You are at WORK (will earn G #_Y%d#Z S #_K%d#Z per hour), come back later! You can 'abort work'.", gold / 100, gold % 100));
+			com.print(String.format("You are at WORK (will earn G #_Y%d#Z S #_K%d#Z per hour), come back later! You can 'abort work'.", gold / 100, gold % 100));
             break;
 //        case Const.RESP_SAVEGAME_STAY_ERROR:
 //            this.ErrorMessage(this.txt[this.TXT_ERROR_SELL_ITEM]);
@@ -996,10 +1019,6 @@ public class ResponseHandler {
 //            this.PreviousLogin = true;
 //            this.GildenID = 0;
             parseSavegame(gd, par[0]);
-            if (gd.getGuildId() > 0) {
-            	Response resp = gd.net.call(Const.ACT_REQUEST_GUILD, gd.getSessionId(), toString(gd.getGuildId()));
-            	handleResponse(resp, cli);
-            }
             
 //            if (par[1]){
 //                this.DealerAktion = int(par[1]);
@@ -1120,7 +1139,7 @@ public class ResponseHandler {
 //            this.ErrorMessage(this.txt[this.TXT_ERROR_NAME_REJECTED]);
 //            break;
         case Const.ERR_LOGIN_FAILED:
-        	cli.print("#_RLogin failed, check your credentials and try again.\n");
+        	com.print("#_RLogin failed, check your credentials and try again.\n");
         	return false;
 //            this.so.data.skipAutoLogin = true;
 //            this.so.data.password = "";
@@ -1131,7 +1150,9 @@ public class ResponseHandler {
 //            this.ShowLoginScreen(undefined, true, true);
 //            this.ErrorMessage(this.txt[this.TXT_ERROR_LOGIN_FAILED]);
 //            break;
-//        case Const.ERR_TOO_EXPENSIVE:
+        case Const.ERR_TOO_EXPENSIVE:
+        	com.print("#_RYou don't have enough money.\n");
+        	break;
 //            if (this.OnStage(this.BTN_MODIFY_CHARACTER)){
 //                this.CharVolk = this.revertCharVolk;
 //                this.CharMann = this.revertCharMann;
@@ -1169,11 +1190,11 @@ public class ResponseHandler {
 		g.restoreFromSave(sg);
 	}
 	
-	private String toString(int i) {
+	public String toString(int i) {
 		return Integer.toString(i);
 	}
 	
-	private int parseInt(String str) {
+	public int parseInt(String str) {
 		if (str == null) {
 			return 0;
 		}
@@ -1185,7 +1206,7 @@ public class ResponseHandler {
 		}
 	}
 	
-	private boolean parseBool(String str) {
+	public boolean parseBool(String str) {
 		return parseInt(str) > 0;
 	}
 }

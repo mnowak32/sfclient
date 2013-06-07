@@ -1,8 +1,8 @@
 package pl.codebrewery.sfgame.engine.commands;
 
-import pl.codebrewery.sfgame.Cli;
 import pl.codebrewery.sfgame.engine.Request;
 import pl.codebrewery.sfgame.engine.Response;
+import pl.codebrewery.sfgame.interfaces.Cli;
 import pl.codebrewery.sfgame.model.Const;
 import pl.codebrewery.sfgame.model.Game;
 

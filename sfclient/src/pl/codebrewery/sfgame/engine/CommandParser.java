@@ -6,11 +6,12 @@ import java.util.Map;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 
-import pl.codebrewery.sfgame.Cli;
+import pl.codebrewery.sfgame.engine.commands.AlbumCommand;
 import pl.codebrewery.sfgame.engine.commands.ChatCommand;
 import pl.codebrewery.sfgame.engine.commands.Command;
 import pl.codebrewery.sfgame.engine.commands.QuestCommand;
 import pl.codebrewery.sfgame.engine.commands.StatsCommand;
+import pl.codebrewery.sfgame.interfaces.Cli;
 import pl.codebrewery.sfgame.model.Game;
 
 public class CommandParser {
@@ -21,6 +22,7 @@ public class CommandParser {
 		cmds.put("sta", new StatsCommand());
 		cmds.put("cha", new ChatCommand());
 		cmds.put("que", new QuestCommand());
+		cmds.put("alb", new AlbumCommand());
 	}
 
 	public boolean parseCommand(String line, Cli cli) {
