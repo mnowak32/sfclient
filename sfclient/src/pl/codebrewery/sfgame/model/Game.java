@@ -1,6 +1,8 @@
 package pl.codebrewery.sfgame.model;
 
 import java.util.Arrays;
+import java.util.Map;
+import java.util.TreeMap;
 
 import pl.codebrewery.sfgame.engine.Net;
 import pl.codebrewery.sfgame.engine.ResponseHandler;
@@ -44,6 +46,9 @@ public class Game {
 	private boolean[] album;
 	private int albumItems;
 	
+	private Chat chat = new Chat();
+	private Guild guild = new Guild();
+	
 	public static class Attr {
 		private int base, bonus, bought;
 		
@@ -84,6 +89,21 @@ public class Game {
 		@Override
 		public String toString() {
 			return String.format("Attr [base=%s, bonus=%s, bought=%s]", base, bonus, bought);
+		}
+	}
+	
+	public static class Chat {
+		private long lastIndex = 0;
+		private Map<Long, ChatLine> lines = new TreeMap<>();
+		
+		public long getLastIndex() {
+			return lastIndex;
+		}
+		public void setLastIndex(long lastIndex) {
+			this.lastIndex = lastIndex;
+		}
+		public Map<Long, ChatLine> getLines() {
+			return lines;
 		}
 	}
 	
@@ -462,6 +482,14 @@ public class Game {
 
 	public void setAlbumItems(int albumItems) {
 		this.albumItems = albumItems;
+	}
+
+	public Chat getChat() {
+		return chat;
+	}
+
+	public Guild getGuild() {
+		return guild;
 	}
 
 	

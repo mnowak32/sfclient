@@ -1,9 +1,8 @@
 package pl.codebrewery.sfgame.interfaces;
 
-import java.io.Console;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
+import java.io.IOException;
 
+import jline.ConsoleReader;
 import pl.codebrewery.sfgame.engine.CommandParser;
 import pl.codebrewery.sfgame.engine.Net;
 import pl.codebrewery.sfgame.engine.Request;
@@ -18,14 +17,16 @@ public class Cli implements Commander {
 //	private static final boolean COLOR = false;
 	
 	private Game gd = Game.I;
-	private Console con;
 	private Net net = gd.net;
 	private ResponseHandler rh = gd.rh;
 	private CommandParser cp = new CommandParser();
+	private boolean color = COLOR;
+	
+	private ConsoleReader con;
 
 	private boolean keepGoing;
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws IOException {
 		if (args.length < 2) {
 			System.err.println("za mało params. daj username i pass");
 			return;
@@ -35,8 +36,8 @@ public class Cli implements Commander {
 		cli.start(args[0], args[1]);
 	}
 	
-	public void start(final String uname, final String pass) {
-		con = System.console();
+	public void start(final String uname, final String pass) throws IOException {
+		con = new ConsoleReader();
 		if (con == null) {
 			System.err.println("No console could be allocated. Giving up.");
 			return;
@@ -55,6 +56,7 @@ public class Cli implements Commander {
 		}
 	}
 	
+	@Override
 	public void relogin() {
 //		Response resp = net.call(new Request(Const.ACT_LOGOUT, gd.getSessionId()));
 //		if (rh.handleResponse(resp, this) == false || resp.isError()) { //zwrot false oznacza: błąd kytyczny, spierdalamy!
@@ -65,6 +67,7 @@ public class Cli implements Commander {
 
 		Response resp = net.call(new Request(Const.ACT_LOGIN, null, gd.getLogin(), Md5.hash(gd.getPassword()), Game.VERSION));
 		if (rh.handleResponse(resp, this) == false || resp.isError()) { //zwrot false oznacza: błąd kytyczny, spierdalamy!
+			print("#_RCritical error, aborting!");
 			keepGoing = false;
 			return;
 		}
@@ -96,7 +99,7 @@ public class Cli implements Commander {
 
 	
 	private String getPrompt() {
-		return String.format("\n%s[#_G%s#Z] [LVL #_B%d#Z EXP #_W%d#Z/#_W%d#Z] (G #_Y%d#Z S #_K%d#Z M #Y%d#Z) " +
+		return String.format("\n%s[#_G%s#Z] [LVL #_B%d#Z EXP #_W%d#Z/#_W%d#Z] (G #_Y%d#Z S #W%d#Z M #Y%d#Z) " +
 			"[%s] {%s} > ",
 			gd.getLogin(), gd.getGuildName(), gd.getLevel(), gd.getExp(), gd.getExpNext(), gd.getGold() / 100, gd.getGold() % 100, gd.getShroom(),
 			getActionStatus(), getFlags());
@@ -117,28 +120,20 @@ public class Cli implements Commander {
 	 * preprocess color codes (maek them ANSI!)
 	 * @param out
 	 */
+	@Override
 	public void print(String out) {
 		for (Ansi a : Ansi.values()) {
-			out = out.replaceAll("#" + a.toString(), COLOR ? a.getEsc() : "");
+			out = out.replaceAll("#" + a.toString(), color ? a.getEsc() : "");
 		}
-		out += Ansi.Z.getEsc();
-		con.printf(out);
-	}
-
-	private static class Md5 {
-		static String hash(String in) {
-			try {
-				MessageDigest md = MessageDigest.getInstance("md5");
-				byte[] dig = md.digest(in.getBytes());
-				StringBuilder sb = new StringBuilder();
-				for (byte b : dig) {
-					sb.append(Integer.toString((b & 0xff) + 0x100, 16).substring(1));
-				}
-				return sb.toString();
-			} catch (NoSuchAlgorithmException e) {
-				e.printStackTrace();
-				return "";
-			}
+		if (color) {
+			out += Ansi.Z.getEsc();
+		}
+		
+		try {
+			con.printString(out);
+			con.flushConsole();
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
 	}
 
@@ -146,5 +141,17 @@ public class Cli implements Commander {
 	public void nullResponse() {
 		// TODO Auto-generated method stub
 		
+	}
+
+	public void cls() {
+		try {
+			con.clearScreen();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public void switchColor() {
+		color = !color;
 	}
 }

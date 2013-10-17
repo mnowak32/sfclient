@@ -4,5 +4,6 @@ public interface Commander {
 
 	void nullResponse();
 	void relogin();
+	void print(String format);
 
 }

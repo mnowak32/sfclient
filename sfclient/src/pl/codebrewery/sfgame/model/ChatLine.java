@@ -2,37 +2,83 @@ package pl.codebrewery.sfgame.model;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 public class ChatLine {
 
 	public enum Type {
-		GOLD("złoto", "złota", "złota"), SHROOM("grzyb", "grzyby", "grzybów"), CHAT, OTHER, DUNGEON, RESTART;
-		private String one, two, five;
-		private Type() {
-			
+		GOLD("dg", new Formatter() {
+			@Override public String format(String[] parts) {
+				int quantity = Integer.parseInt(parts[3]);
+				quantity /= 100;
+				return "#Y" + parts[2] + "#Z - " + quantity + " $";
+			}
+		}),
+		SHROOM("dm", new Formatter() {
+			@Override public String format(String[] parts) {
+				int quantity = Integer.parseInt(parts[3]);
+				quantity /= 100;
+				return "#R" + parts[2] + "#Z - " + quantity + " shroom" + (quantity != 1 ? "s" : "");
+			}
+		}),
+		CHAT("", new Formatter() {
+			@Override public String format(String[] parts) {
+				return parts[0] + ": #W" + parts[1] + "#Z";
+			}
+		}),
+		OTHER("", null),
+		DUNGEON("du", new Formatter() {
+			@Override public String format(String[] parts) {
+				long ts = Long.parseLong(parts[2]) * 1000; 
+				Date d = new Date();
+				d.setTime(ts);
+				return "#_Bserver restart @ " + (new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(d)) + "#Z";
+			}
+		}),
+		RESTART("sr", new Formatter() {
+			@Override public String format(String[] parts) {
+				return "#G" + parts[2] + "#Z has finished level " + parts[4] + " of dungeon #" + parts[3];
+			}
+		}),
+		LEVEL_UP("lu", new Formatter() {
+			@Override public String format(String[] parts) {
+				return "#B" + parts[2] + "#Z has reached level " + parts[3];
+			}
+		});
+		
+		private String idString;
+		private Formatter fmt;
+		
+		private static Map<String, Type> idMap;
+		
+		private interface Formatter {
+			String format(String[] parts);
 		}
-		private Type(String o, String t, String f) {
-			one = o;
-			two = t;
-			five = f;
+
+		private Type(String id, Formatter f) {
+			idString = id;
+			fmt = f;
+		}
+
+		public String getIdString() {
+			return idString;
 		}
 		
-		String getQuant(int q) {
-			if (q == 1) {
-				return one;
+		public static Map<String, Type> getIdMap() {
+			if (idMap == null)
+			idMap = new HashMap<String, Type>();
+			for(Type t : values()) {
+				idMap.put(t.getIdString(), t);
 			}
-			final int mod100 = q % 100;
-			if (mod100 > 11 && mod100 < 15) {
-				return five;
-			}
-			final int mod10 = q % 10;
-			if (mod10 > 1 && mod10 < 5) {
-				return two;
-			}
-			return five;
+			return idMap ;
+		}
+
+		public Formatter getFmt() {
+			return fmt;
 		}
 	}
-
+	
 	private int id;
 	private Type type;
 	private String line;
@@ -41,22 +87,19 @@ public class ChatLine {
 //		System.out.println(in);
 		if (in.startsWith("#")) {
 			String[] parts = in.split("#");
-			if (parts[1].equals("dm") || parts[1].equals("dg")) {
-				int quantity = Integer.parseInt(parts[3]);
-				type = parts[1].equals("dm") ? Type.SHROOM : Type.GOLD;
-				quantity /= 100;
-				line = parts[2] + " - " + quantity + " " + type.getQuant(quantity);
-			} else if (parts[1].equals("du")) {
-				type = Type.DUNGEON;
-				line = parts[2] + " has finished level " + parts[4] + " of dungeon #" + parts[3];
-			} else if (parts[1].equals("sr")) {
-				long ts = Long.parseLong(parts[2]) * 1000; 
-				Date d = new Date();
-				d.setTime(ts);
-				line = "server restart @ " + (new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(d));
+			String key = parts[1];
+			Map<String, Type> typeMap = Type.getIdMap();
+			if (typeMap.containsKey(key)) {
+				type = typeMap.get(key);
+				line = type.getFmt().format(parts);
+			} else {
+				type = Type.OTHER;
+				line = in;
 			}
 		} else {
-			line = in;
+			type = Type.CHAT;
+			String parts[] = in.split(":\ufffd"); //dziwny separator...
+			line = Type.CHAT.getFmt().format(parts);
 		}
 	}
 
@@ -88,6 +131,4 @@ public class ChatLine {
 	public String toString() {
 		return "ChatLine [id=" + id + ", type=" + type + ", line=" + line + "]";
 	}
-
-	
 }

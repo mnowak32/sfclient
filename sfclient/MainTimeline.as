@@ -3039,7 +3039,7 @@
         public const REL_EMAIL_NAG_BTN_Y = 280;
         public const REL_COMPARE_TAB = 280;
         public const GUILD_RAID_LEVEL = 8;
-        public const GUILD_IS_RAID = 9;
+        public const GUILD2_IS_RAID = 9;
         public const GUILD_MEMBERID = 14;
         public const GUILD_MEMBERLEVEL = 64;
         public const GUILD_MEMBERONLINE = 114;

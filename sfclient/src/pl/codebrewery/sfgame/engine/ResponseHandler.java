@@ -1,20 +1,20 @@
 package pl.codebrewery.sfgame.engine;
 
 import java.util.Arrays;
-import java.util.LinkedList;
+import java.util.Map;
 
 import javax.xml.bind.DatatypeConverter;
 
 import org.apache.commons.lang3.StringUtils;
 
-import pl.codebrewery.sfgame.interfaces.Cli;
+import pl.codebrewery.sfgame.interfaces.Commander;
 import pl.codebrewery.sfgame.model.ChatLine;
 import pl.codebrewery.sfgame.model.Const;
 import pl.codebrewery.sfgame.model.Game;
 
 public class ResponseHandler {
 
-	public boolean handleResponse(final Response r, final Cli com) {
+	public boolean handleResponse(final Response r, final Commander com) {
 		if (r == null) {
 			com.nullResponse();
 //			com.print("Null response encountered!\n");
@@ -24,8 +24,8 @@ public class ResponseHandler {
 		final int act = r.getCode();
 		final String[] par = r.getParts();
 		final Game gd = Game.I;
-		
-        switch (act) {
+
+		switch (act) {
 //        case Const.ERR_TOWER_CLOSED:
 //            break;
 //        case Const.RESP_TOWER_SAVE:
@@ -98,8 +98,6 @@ public class ResponseHandler {
 //        case Const.ERR_GUILD_DESCR_TOO_LONG:
 //            this.ErrorMessage(this.txt[this.TXT_ERR_GUILD_DESCR_TOO_LONG]);
 //            break;
-//        case Const.ERR_NO_CHAT_INFO:
-//            break;
 //        case Const.ERR_NO_CHAT_OVERFLOW:
 //            break;
 //        case Const.ERR_GUILD_RANK_WRONG:
@@ -124,7 +122,7 @@ public class ResponseHandler {
         	for (boolean a : album) {
         		if (a) albumCounter++;
         	}
-        	com.print(String.format("Album completion: #_R%d/%d#Z.\n", albumCounter, Game.CONTENT_MAX));
+        	com.print(String.format("Album completion: #_R%d/%d#Z (#Y%.2f%%%%#Z).\n", albumCounter, Game.CONTENT_MAX, (100.0 * albumCounter / Game.CONTENT_MAX)));
         	break;
 //            tmpByteArray = Base64.decodeToByteArray(par.join("/"));
 //            bitArray = new Array();
@@ -215,7 +213,7 @@ public class ResponseHandler {
 //            break;
         case Const.ERR_SESSION_ID_EXPIRED:
         	gd.setSessionId(null);
-//        	com.print("#RSession expired, re-logging...\n");
+        	com.print("#RSession expired, re-logging...\n");
         	com.relogin();
         	break;
 //            this.trc("Achtung, sessionID ist abgelaufen.");
@@ -339,11 +337,24 @@ public class ResponseHandler {
         case Const.RESP_CHAT_HISTORY:
     			gd.setNewChat(false);
     			String[] lines = par[0].split("/");
-    			LinkedList<ChatLine> chat = new LinkedList<ChatLine>();
-    			for (String line : lines) {
-    				chat.addFirst(new ChatLine(line));
+    			String[] ids = par[3].split("/");
+    			long lastId = Long.parseLong(par[1]);
+    			
+    			if (lastId != gd.getChat().getLastIndex()) {
+    				Map<Long, ChatLine> map = gd.getChat().getLines();
+    				for (int i = 0; i < lines.length; i++) {
+    					long id = Long.parseLong(ids[i]);
+    					ChatLine cl = new ChatLine(lines[i]);
+    					if (!map.containsKey(id)) {
+    						map.put(id,  cl);
+    					}
+    				}
     			}
-    			for (ChatLine cl : chat) {
+    			
+    			//fall throgh!
+    			
+        case Const.ERR_NO_CHAT_INFO:
+    			for (ChatLine cl : gd.getChat().getLines().values()) {
     				com.print(cl.getLine() + "\n");
     			}
     			break;
@@ -634,7 +645,12 @@ public class ResponseHandler {
 //            ParseSavegame(par[0]);
 //            this.SendAction(this.ACT_SCREEN_GILDEN);
 //            break;
-//        case Const.ACT_SCREEN_GILDEN:
+        case Const.ACT_SCREEN_GILDEN:
+//        	System.out.println(par[0]);
+        	gd.getGuild().restoreFromSave(par[0]);
+        	gd.getGuild().checkOwnReadiness(gd.getPlayerId());
+//        	System.out.println(gd.getGuild());
+        	break;
 //            this.Savegame[this.SG_GUILD_INDEX] = par[0].split("/")[0];
 //            this.Gilde = par[3];
 //            isMine = true;

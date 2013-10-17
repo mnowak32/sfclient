@@ -8,6 +8,8 @@ import org.apache.commons.lang3.StringUtils;
 
 import pl.codebrewery.sfgame.engine.commands.AlbumCommand;
 import pl.codebrewery.sfgame.engine.commands.ChatCommand;
+import pl.codebrewery.sfgame.engine.commands.ClearCommand;
+import pl.codebrewery.sfgame.engine.commands.ColorCommand;
 import pl.codebrewery.sfgame.engine.commands.Command;
 import pl.codebrewery.sfgame.engine.commands.QuestCommand;
 import pl.codebrewery.sfgame.engine.commands.StatsCommand;
@@ -23,6 +25,8 @@ public class CommandParser {
 		cmds.put("cha", new ChatCommand());
 		cmds.put("que", new QuestCommand());
 		cmds.put("alb", new AlbumCommand());
+		cmds.put("col", new ColorCommand());
+		cmds.put("cle", new ClearCommand());
 	}
 
 	public boolean parseCommand(String line, Cli cli) {
