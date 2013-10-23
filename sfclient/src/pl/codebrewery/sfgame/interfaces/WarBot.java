@@ -16,16 +16,18 @@ public class WarBot implements Commander {
 	private ResponseHandler rh = gd.rh;
 	
 	public static void main(String[] args) throws IOException, InterruptedException {
-		if (args.length < 2) {
-			System.err.println("za mało params. daj username i pass");
+		if (args.length < 3) {
+			System.err.println("za mało params. daj serwer, username i pass");
 			return;
 		}
 		
 		WarBot bot = new WarBot();
-		bot.start(args[0], args[1]);
+		bot.start(args[0], args[1], args[2]);
 	}
 	
-	public void start(final String uname, final String pass) throws IOException, InterruptedException {
+	public void start(final String server, final String uname, final String pass) throws IOException, InterruptedException {
+		
+		net.setServer(server);
 		
 		gd.setLogin(uname);
 		gd.setPassword(pass);

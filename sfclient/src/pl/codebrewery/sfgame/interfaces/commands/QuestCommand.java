@@ -1,4 +1,4 @@
-package pl.codebrewery.sfgame.engine.commands;
+package pl.codebrewery.sfgame.interfaces.commands;
 
 import pl.codebrewery.sfgame.engine.Request;
 import pl.codebrewery.sfgame.engine.Response;

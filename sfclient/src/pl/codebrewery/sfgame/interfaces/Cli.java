@@ -3,7 +3,6 @@ package pl.codebrewery.sfgame.interfaces;
 import java.io.IOException;
 
 import jline.ConsoleReader;
-import pl.codebrewery.sfgame.engine.CommandParser;
 import pl.codebrewery.sfgame.engine.Net;
 import pl.codebrewery.sfgame.engine.Request;
 import pl.codebrewery.sfgame.engine.Response;
@@ -27,21 +26,23 @@ public class Cli implements Commander {
 	private boolean keepGoing;
 
 	public static void main(String[] args) throws IOException {
-		if (args.length < 2) {
-			System.err.println("za mało params. daj username i pass");
+		if (args.length < 3) {
+			System.err.println("za mało params. daj serwer, username i pass");
 			return;
 		}
 		
 		Cli cli = new Cli();
-		cli.start(args[0], args[1]);
+		cli.start(args[0], args[1], args[2]);
 	}
 	
-	public void start(final String uname, final String pass) throws IOException {
+	public void start(final String server, final String uname, final String pass) throws IOException {
 		con = new ConsoleReader();
 		if (con == null) {
 			System.err.println("No console could be allocated. Giving up.");
 			return;
 		}
+		
+		net.setServer(server);
 		
 		keepGoing = true;
 		gd.setLogin(uname);

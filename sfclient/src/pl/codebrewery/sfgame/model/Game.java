@@ -30,8 +30,8 @@ public class Game {
 	private boolean[] mirrorParts = new boolean[13];
 	private boolean hasMirror, canRob;
 	private int towerLevel, mount;
-	private int level, gold, shroom;
-	private int exp, expNext;
+	private int level, shroom;
+	private long gold, exp, expNext;
 	
 	private Attr str, dex, intel, endur, luck;
 	
@@ -137,10 +137,10 @@ public class Game {
 		mount = mount & 0xffff;
 		
 		level = Integer.parseInt(saveGame[Const.SG_LEVEL]);
-		gold = Integer.parseInt(saveGame[Const.SG_GOLD]);
+		gold = Long.parseLong(saveGame[Const.SG_GOLD]);
 		shroom = Integer.parseInt(saveGame[Const.SG_MUSH]);
-		exp = Integer.parseInt(saveGame[Const.SG_EXP]);
-		expNext = Integer.parseInt(saveGame[Const.SG_EXP_FOR_NEXTLEVEL]);
+		exp = Long.parseLong(saveGame[Const.SG_EXP]);
+		expNext = Long.parseLong(saveGame[Const.SG_EXP_FOR_NEXTLEVEL]);
 		
 		int base = Integer.parseInt(saveGame[Const.SG_ATTR_STAERKE]);
 		int bonus = Integer.parseInt(saveGame[Const.SG_ATTR_STAERKE_BONUS]);
@@ -316,11 +316,11 @@ public class Game {
 		this.level = level;
 	}
 
-	public int getGold() {
+	public long getGold() {
 		return gold;
 	}
 
-	public void setGold(int gold) {
+	public void setGold(long gold) {
 		this.gold = gold;
 	}
 
@@ -332,19 +332,19 @@ public class Game {
 		this.shroom = shroom;
 	}
 
-	public int getExp() {
+	public long getExp() {
 		return exp;
 	}
 
-	public void setExp(int exp) {
+	public void setExp(long exp) {
 		this.exp = exp;
 	}
 
-	public int getExpNext() {
+	public long getExpNext() {
 		return expNext;
 	}
 
-	public void setExpNext(int expNext) {
+	public void setExpNext(long expNext) {
 		this.expNext = expNext;
 	}
 

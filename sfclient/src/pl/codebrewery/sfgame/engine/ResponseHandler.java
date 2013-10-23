@@ -646,10 +646,10 @@ public class ResponseHandler {
 //            this.SendAction(this.ACT_SCREEN_GILDEN);
 //            break;
         case Const.ACT_SCREEN_GILDEN:
-//        	System.out.println(par[0]);
+        	System.out.println(par[0]);
         	gd.getGuild().restoreFromSave(par[0]);
         	gd.getGuild().checkOwnReadiness(gd.getPlayerId());
-//        	System.out.println(gd.getGuild());
+        	System.out.println(gd.getGuild());
         	break;
 //            this.Savegame[this.SG_GUILD_INDEX] = par[0].split("/")[0];
 //            this.Gilde = par[3];

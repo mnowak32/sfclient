@@ -1,4 +1,4 @@
-package pl.codebrewery.sfgame.engine;
+package pl.codebrewery.sfgame.interfaces;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -6,14 +6,14 @@ import java.util.Map;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 
-import pl.codebrewery.sfgame.engine.commands.AlbumCommand;
-import pl.codebrewery.sfgame.engine.commands.ChatCommand;
-import pl.codebrewery.sfgame.engine.commands.ClearCommand;
-import pl.codebrewery.sfgame.engine.commands.ColorCommand;
-import pl.codebrewery.sfgame.engine.commands.Command;
-import pl.codebrewery.sfgame.engine.commands.QuestCommand;
-import pl.codebrewery.sfgame.engine.commands.StatsCommand;
-import pl.codebrewery.sfgame.interfaces.Cli;
+import pl.codebrewery.sfgame.engine.Response;
+import pl.codebrewery.sfgame.interfaces.commands.AlbumCommand;
+import pl.codebrewery.sfgame.interfaces.commands.ChatCommand;
+import pl.codebrewery.sfgame.interfaces.commands.ClearCommand;
+import pl.codebrewery.sfgame.interfaces.commands.ColorCommand;
+import pl.codebrewery.sfgame.interfaces.commands.Command;
+import pl.codebrewery.sfgame.interfaces.commands.QuestCommand;
+import pl.codebrewery.sfgame.interfaces.commands.StatsCommand;
 import pl.codebrewery.sfgame.model.Game;
 
 public class CommandParser {

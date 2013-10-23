@@ -11,8 +11,10 @@ import pl.codebrewery.sfgame.model.Game;
 
 public class Net {
 
-	private static final String ENDPOINT = "http://s1.sfgame.pl/request.php?req=%s%s%s&rnd=%s";
+	private static final String ENDPOINT = "http://%s/request.php?req=%s%s%s&rnd=%s";
 	//http://s1.sfgame.pl/request.php?req=Y5K2B4K42547d64A6066442485032S70503105577&random=%2&rnd=10469360351367927091655
+	
+	private String server;
 	
 	private String getRandom() {
 		return String.format("%d%d", Math.round(Math.random() * 0x77359400), Game.I.getGameTime() / 1000);
@@ -24,7 +26,7 @@ public class Net {
 	}
 	
 	public Response call(Request r) {
-		String urlString = String.format(ENDPOINT, r.getSessionId(), r.getActionStr(), r.getAllParams(), getRandom());
+		String urlString = String.format(ENDPOINT, server, r.getSessionId(), r.getActionStr(), r.getAllParams(), getRandom());
 //		System.out.println("calling: " + urlString);
 		try {
 			URL url = new URL(urlString);
@@ -72,5 +74,13 @@ public class Net {
 			e.printStackTrace();
 		}
 		return null;
+	}
+
+	public String getServer() {
+		return server;
+	}
+
+	public void setServer(String server) {
+		this.server = server;
 	}
 }
