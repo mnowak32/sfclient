@@ -67,7 +67,10 @@ public class WarBot implements Commander {
 
 	@Override
 	public void relogin() {
-		Response resp = net.call(Const.ACT_LOGIN, null, gd.getLogin(), Md5.hash(gd.getPassword()), Game.VERSION);
+		//można przekazać hasło jako gotowy hash. nie jest to do końca fool-proof, ale rzadko kto ma 32 znakowe hasło hex...
+		String hash = gd.getPassword().matches("^[0-9a-f]{32}$") ? gd.getPassword() : Md5.hash(gd.getPassword());
+		
+		Response resp = net.call(Const.ACT_LOGIN, null, gd.getLogin(), hash, Game.VERSION);
 		if (rh.handleResponse(resp, this) == false || resp.isError()) { //zwrot false oznacza: błąd kytyczny, spierdalamy!
 			print("#_RCritical error, aborting!");
 			return;
