@@ -12,6 +12,7 @@ import pl.codebrewery.sfgame.interfaces.commands.ChatCommand;
 import pl.codebrewery.sfgame.interfaces.commands.ClearCommand;
 import pl.codebrewery.sfgame.interfaces.commands.ColorCommand;
 import pl.codebrewery.sfgame.interfaces.commands.Command;
+import pl.codebrewery.sfgame.interfaces.commands.DungeonCommand;
 import pl.codebrewery.sfgame.interfaces.commands.QuestCommand;
 import pl.codebrewery.sfgame.interfaces.commands.StatsCommand;
 import pl.codebrewery.sfgame.model.Game;
@@ -27,6 +28,7 @@ public class CommandParser {
 		cmds.put("alb", new AlbumCommand());
 		cmds.put("col", new ColorCommand());
 		cmds.put("cle", new ClearCommand());
+		cmds.put("dun", new DungeonCommand());
 	}
 
 	public boolean parseCommand(String line, Cli cli) {

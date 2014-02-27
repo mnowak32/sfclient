@@ -26,8 +26,12 @@ public class Net {
 	}
 	
 	public Response call(Request r) {
+		return call(r, false);
+	}
+	
+	public Response call(Request r, boolean debug) {
 		String urlString = String.format(ENDPOINT, server, r.getSessionId(), r.getActionStr(), r.getAllParams(), getRandom());
-//		System.out.println("calling: " + urlString);
+		if (debug) System.out.println("calling: " + urlString);
 		try {
 			URL url = new URL(urlString);
 			URLConnection conn = url.openConnection();
@@ -64,6 +68,7 @@ public class Net {
 			}
 			
 			re.setParts(plainResp.split(";"));
+			re.setDebug(debug);
 			
 			return re;
 		} catch (MalformedURLException e) {

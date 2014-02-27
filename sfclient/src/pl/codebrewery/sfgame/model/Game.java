@@ -22,6 +22,8 @@ public class Game {
 	private long gameTime, serverTime;
 	private long serverDeltaT;
 	
+	private int level;
+	
 	private int playerId, guildId;
 	private int playerClass, gender;
 	
@@ -29,12 +31,11 @@ public class Game {
 	
 	private boolean[] mirrorParts = new boolean[13];
 	private boolean hasMirror, canRob;
-	private int towerLevel, mount;
-	private int level, shroom;
+	private int towerLevel, dungeonLevel, dungeon13, mount;
+	private int shroom;
 	private long gold, exp, expNext;
 	
-	private Attr str, dex, intel, endur, luck;
-	
+	private Stats stats = new Stats();
 	private int action, actionCountdown;
 	private boolean newChat = false;
 	
@@ -136,6 +137,9 @@ public class Game {
 		towerLevel = mount >> 16;
 		mount = mount & 0xffff;
 		
+		dungeonLevel = Integer.parseInt(saveGame[Const.SG_DUNGEON_LEVEL]);
+		dungeon13 = Integer.parseInt(saveGame[Const.SG_DUNGEON_13]);
+		
 		level = Integer.parseInt(saveGame[Const.SG_LEVEL]);
 		gold = Long.parseLong(saveGame[Const.SG_GOLD]);
 		shroom = Integer.parseInt(saveGame[Const.SG_MUSH]);
@@ -145,27 +149,27 @@ public class Game {
 		int base = Integer.parseInt(saveGame[Const.SG_ATTR_STAERKE]);
 		int bonus = Integer.parseInt(saveGame[Const.SG_ATTR_STAERKE_BONUS]);
 		int bought = Integer.parseInt(saveGame[Const.SG_ATTR_STAERKE_GEKAUFT]);
-		str = new Attr(base, bonus, bought);
+		stats.str = new Attr(base, bonus, bought);
 		
 		base = Integer.parseInt(saveGame[Const.SG_ATTR_BEWEGLICHKEIT]);
 		bonus = Integer.parseInt(saveGame[Const.SG_ATTR_BEWEGLICHKEIT_BONUS]);
 		bought = Integer.parseInt(saveGame[Const.SG_ATTR_BEWEGLICHKEIT_GEKAUFT]);
-		dex = new Attr(base, bonus, bought);
+		stats.dex = new Attr(base, bonus, bought);
 		
 		base = Integer.parseInt(saveGame[Const.SG_ATTR_INTELLIGENZ]);
 		bonus = Integer.parseInt(saveGame[Const.SG_ATTR_INTELLIGENZ_BONUS]);
 		bought = Integer.parseInt(saveGame[Const.SG_ATTR_INTELLIGENZ_GEKAUFT]);
-		endur = new Attr(base, bonus, bought);
+		stats.endur = new Attr(base, bonus, bought);
 		
 		base = Integer.parseInt(saveGame[Const.SG_ATTR_AUSDAUER]);
 		bonus = Integer.parseInt(saveGame[Const.SG_ATTR_AUSDAUER_BONUS]);
 		bought = Integer.parseInt(saveGame[Const.SG_ATTR_AUSDAUER_GEKAUFT]);
-		intel = new Attr(base, bonus, bought);
+		stats.intel = new Attr(base, bonus, bought);
 		
 		base = Integer.parseInt(saveGame[Const.SG_ATTR_WILLENSKRAFT]);
 		bonus = Integer.parseInt(saveGame[Const.SG_ATTR_WILLENSKRAFT_BONUS]);
 		bought = Integer.parseInt(saveGame[Const.SG_ATTR_WILLENSKRAFT_GEKAUFT]);
-		luck = new Attr(base, bonus, bought);
+		stats.luck = new Attr(base, bonus, bought);
 		
 		action = Integer.parseInt(saveGame[Const.SG_ACTION_STATUS]);
 		actionCountdown = Integer.parseInt(saveGame[Const.SG_ACTION_ENDTIME]);
@@ -264,8 +268,8 @@ public class Game {
 			.format(
 				"GameData [login=%s, password=%s, sessionId=%s, gameTime=%s, serverTime=%s, serverDeltaT=%s, playerId=%s, guildId=%s, playerClass=%s, gender=%s, guildName=%s, mirrorParts=%s, hasMirror=%s, canRob=%s, towerLevel=%s, mount=%s, level=%s, gold=%s, shroom=%s, exp=%s, expNext=%s, str=%s, dex=%s, intel=%s, endur=%s, luck=%s, action=%s, actionCountdown=%s, newChat=%s, questTime=%s, quests=%s, beerFest=%s]",
 				login, password, sessionId, gameTime, serverTime, serverDeltaT, playerId, guildId, playerClass, gender, guildName,
-				Arrays.toString(mirrorParts), hasMirror, canRob, towerLevel, mount, level, gold, shroom, exp, expNext, str, dex,
-				intel, endur, luck, action, actionCountdown, newChat, questTime, Arrays.toString(quests), beerFest);
+				Arrays.toString(mirrorParts), hasMirror, canRob, towerLevel, mount, level, gold, shroom, exp, expNext, stats.str, stats.dex,
+				stats.intel, stats.endur, stats.luck, action, actionCountdown, newChat, questTime, Arrays.toString(quests), beerFest);
 	}
 
 	public boolean[] getMirrorParts() {
@@ -357,43 +361,43 @@ public class Game {
 	}
 
 	public Attr getStr() {
-		return str;
+		return stats.str;
 	}
 
 	public void setStr(Attr str) {
-		this.str = str;
+		this.stats.str = str;
 	}
 
 	public Attr getDex() {
-		return dex;
+		return stats.dex;
 	}
 
 	public void setDex(Attr dex) {
-		this.dex = dex;
+		this.stats.dex = dex;
 	}
 
 	public Attr getIntel() {
-		return intel;
+		return stats.intel;
 	}
 
 	public void setIntel(Attr intel) {
-		this.intel = intel;
+		this.stats.intel = intel;
 	}
 
 	public Attr getEndur() {
-		return endur;
+		return stats.endur;
 	}
 
 	public void setEndur(Attr endur) {
-		this.endur = endur;
+		this.stats.endur = endur;
 	}
 
 	public Attr getLuck() {
-		return luck;
+		return stats.luck;
 	}
 
 	public void setLuck(Attr luck) {
-		this.luck = luck;
+		this.stats.luck = luck;
 	}
 
 	public int getAction() {
@@ -490,6 +494,26 @@ public class Game {
 
 	public Guild getGuild() {
 		return guild;
+	}
+
+	public int getDungeonLevel() {
+		return dungeonLevel;
+	}
+
+	public void setDungeonLevel(int dungeonLevel) {
+		this.dungeonLevel = dungeonLevel;
+	}
+
+	public int getDungeon13() {
+		return dungeon13;
+	}
+
+	public void setDungeon13(int dungeon13) {
+		this.dungeon13 = dungeon13;
+	}
+
+	public Stats getStats() {
+		return stats;
 	}
 
 	
