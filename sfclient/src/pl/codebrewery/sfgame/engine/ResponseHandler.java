@@ -1274,11 +1274,11 @@ save 1018553042/411526/1393341359/1365510919/-469780145/40/0/218/2598257/8430591
 		for(Round r: f.getRounds()) {
 			other = r.getWho().next();
 			com.print(String.format("%s %s %s for %d HP\n",
-				other.getName(), r.getHit().action(other), r.getWho().getName(), r.getDamage()
+				r.getWho(), r.getHit().action(r.getWho()), other.getName(), r.getDamage()
 			));
 		}
 		
-		com.print(String.format("%s won\n", other.getName()));
+		com.print(String.format("%s won\n", other.next().getName()));
 	}
 
 	private int[] strToIntArray(String string) {
