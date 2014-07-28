@@ -110,7 +110,7 @@ public class Cli implements Commander {
 		if (gd.getAction() == 0) {
 			return "---";
 		}
-		int deltaT = gd.getActionCountdown() - (int)((System.currentTimeMillis() + gd.getServerDeltaT()) / 1000);
+		long deltaT = gd.getActionCountdown() - (int)((System.currentTimeMillis() + gd.getServerDeltaT()) / 1000);
 		if (deltaT > 0) {
 			return String.format("@%s, #_W%02d:%02d:%02d#Z left", gd.getAction() == 1 ? "#_RWORK#Z" : "#_GQUEST#Z", deltaT / 3600, deltaT % 3600 / 60, deltaT % 60);
 		}

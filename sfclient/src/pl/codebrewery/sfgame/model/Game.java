@@ -36,7 +36,7 @@ public class Game {
 	private long gold, exp, expNext;
 	
 	private Stats stats = new Stats();
-	private int action, actionCountdown;
+	private long action, actionCountdown;
 	private boolean newChat = false;
 	
 	private int questTime;
@@ -171,8 +171,8 @@ public class Game {
 		bought = Integer.parseInt(saveGame[Const.SG_ATTR_WILLENSKRAFT_GEKAUFT]);
 		stats.luck = new Attr(base, bonus, bought);
 		
-		action = Integer.parseInt(saveGame[Const.SG_ACTION_STATUS]);
-		actionCountdown = Integer.parseInt(saveGame[Const.SG_ACTION_ENDTIME]);
+		action = Long.parseLong(saveGame[Const.SG_ACTION_STATUS]);
+		actionCountdown = Long.parseLong(saveGame[Const.SG_ACTION_ENDTIME]);
 		
 		questTime = Integer.parseInt(saveGame[Const.SG_TIMEBAR]);
 		
@@ -400,19 +400,19 @@ public class Game {
 		this.stats.luck = luck;
 	}
 
-	public int getAction() {
+	public long getAction() {
 		return action;
 	}
 
-	public void setAction(int action) {
+	public void setAction(long action) {
 		this.action = action;
 	}
 
-	public int getActionCountdown() {
+	public long getActionCountdown() {
 		return actionCountdown;
 	}
 
-	public void setActionCountdown(int actionCountdown) {
+	public void setActionCountdown(long actionCountdown) {
 		this.actionCountdown = actionCountdown;
 	}
 
