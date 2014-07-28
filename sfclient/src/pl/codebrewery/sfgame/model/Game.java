@@ -31,8 +31,8 @@ public class Game {
 	
 	private boolean[] mirrorParts = new boolean[13];
 	private boolean hasMirror, canRob;
-	private int towerLevel, dungeonLevel, dungeon13, mount;
-	private int shroom;
+	private long towerLevel, dungeonLevel, dungeon13;
+	private int mount, shroom;
 	private long gold, exp, expNext;
 	
 	private Stats stats = new Stats();
@@ -135,10 +135,10 @@ public class Game {
 		
 		int mount = Integer.parseInt(saveGame[Const.SG_MOUNT]);
 		towerLevel = mount >> 16;
-		mount = mount & 0xffff;
+		this.mount = mount & 0xffff;
 		
-		dungeonLevel = Integer.parseInt(saveGame[Const.SG_DUNGEON_LEVEL]);
-		dungeon13 = Integer.parseInt(saveGame[Const.SG_DUNGEON_13]);
+		dungeonLevel = Long.parseLong(saveGame[Const.SG_DUNGEON_LEVEL]);
+		dungeon13 = Long.parseLong(saveGame[Const.SG_DUNGEON_13]);
 		
 		level = Integer.parseInt(saveGame[Const.SG_LEVEL]);
 		gold = Long.parseLong(saveGame[Const.SG_GOLD]);
@@ -304,11 +304,11 @@ public class Game {
 		this.mount = mount;
 	}
 
-	public int getTowerLevel() {
+	public long getTowerLevel() {
 		return towerLevel;
 	}
 
-	public void setTowerLevel(int towerLevel) {
+	public void setTowerLevel(long towerLevel) {
 		this.towerLevel = towerLevel;
 	}
 
@@ -496,19 +496,19 @@ public class Game {
 		return guild;
 	}
 
-	public int getDungeonLevel() {
+	public long getDungeonLevel() {
 		return dungeonLevel;
 	}
 
-	public void setDungeonLevel(int dungeonLevel) {
+	public void setDungeonLevel(long dungeonLevel) {
 		this.dungeonLevel = dungeonLevel;
 	}
 
-	public int getDungeon13() {
+	public long getDungeon13() {
 		return dungeon13;
 	}
 
-	public void setDungeon13(int dungeon13) {
+	public void setDungeon13(long dungeon13) {
 		this.dungeon13 = dungeon13;
 	}
 

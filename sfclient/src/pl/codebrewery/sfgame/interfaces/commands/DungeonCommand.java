@@ -21,7 +21,7 @@ public class DungeonCommand implements Command {
 				"", g.getDungeonLevel(), g.getDungeon13(), g.getTowerLevel()));
 			return null;
 		} else if ("go".equals(cmd)) {
-			return g.net.call(new Request(Const.ACT_MAINQUEST, g.getSessionId(), Integer.toString(g.getDungeonLevel())), true); //debug
+			return g.net.call(new Request(Const.ACT_MAINQUEST, g.getSessionId(), Long.toString(g.getDungeonLevel())), true); //debug
 		}
 		
 		cli.print("#RBad dungeon command#Z");
