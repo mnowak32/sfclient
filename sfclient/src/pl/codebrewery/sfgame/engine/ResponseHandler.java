@@ -10,6 +10,9 @@ import org.apache.commons.lang3.StringUtils;
 import pl.codebrewery.sfgame.interfaces.Commander;
 import pl.codebrewery.sfgame.model.ChatLine;
 import pl.codebrewery.sfgame.model.Const;
+import pl.codebrewery.sfgame.model.Fight;
+import pl.codebrewery.sfgame.model.Fight.Fighter;
+import pl.codebrewery.sfgame.model.Fight.Round;
 import pl.codebrewery.sfgame.model.Game;
 
 public class ResponseHandler {
@@ -24,6 +27,11 @@ public class ResponseHandler {
 		final int act = r.getCode();
 		final String[] par = r.getParts();
 		final Game gd = Game.I;
+		
+		if (r.isDebug()) {
+			com.print("DEBUG response:");
+			com.print(r.toString());
+		}
 
 		switch (act) {
 //        case Const.ERR_TOWER_CLOSED:
@@ -235,9 +243,10 @@ public class ResponseHandler {
 //                this.ErrorMessage("Error: Your email address has to be validated in order to send messages.");
 //            };
 //            break;
-//        case Const.ERR_INVENTORY_FULL:
+        case Const.ERR_INVENTORY_FULL:
 //            this.ErrorMessage(this.txt[this.TXT_ERROR_INVENTORY_FULL]);
-//            break;
+        	com.print("Inventory full!\n");
+            break;
 //        case Const.ERR_INVENTORY_FULL_ADV:
 //            if (this.txt[this.TXT_ERROR_INVENTORY_FULL_ADV]){
 //                this.ErrorMessage(this.txt[this.TXT_ERROR_INVENTORY_FULL_ADV]);
@@ -560,14 +569,56 @@ public class ResponseHandler {
                 gd.setGuildName(par[0]);
             };
             break;
-//        case Const.RESP_MAINQUEST:
+        case Const.RESP_MAINQUEST:
 //            this.Hide(this.BNC_IF_STATS);
-//            ParseSavegame(par[10]);
+        	gd.restoreFromSave(par[10]);
 //            this.PulseChar = false;
-//        case Const.RESP_QUEST_DONE:
+        case Const.RESP_QUEST_DONE:
 //        case Const.RESP_QUEST_DONE_PIXEL:
 //            this.fightLock = true;
 //            this.PostFightMode = false;
+/*
+
+
+main: ShowFightScreen(fighterData, fightData, getPilz, faceData, isPvP, weaponData, HonorGain, GoldGain, isMQ, isReplay, backPackSlot);
+optional: GuildBattleData=undefined, lastFight=false, guildExp=0, guildHonor=0, ownGuild="", oppGuild="", raidLevel=0
+
+ShowFightScreen(
+	fighterData = par[0].split("/"),
+	fightData = par[1].split("/"),
+	getPilz = (par[6] == "1"),
+	faceData = par[2].split("/"),
+	isPvP = (par[5] == "2"),
+	weaponData = ((par[3] + "/") + par[4]).split("/"),
+	HonorGain = int(par[7]),
+	GoldGain = int(par[8]),
+	isMQ = (par[5] == "3"),
+	isReplay = false,
+	backPackSlot = int(par[9])
+);
+
+:Response [error=false, code=122,
+parts=[
+0 fighter 4545345/4530/2140/2675/4151/4051/3414960/1475/1495/6020/5580/2145,
+1 fight 4117652/0/0/3414960/427693/0/3044645/451335/3/2963625/1073007/3/2086282/553220/3/2410405/958362/0/1197978/463290/0/1947115/888304/0/-1198618/878772/3/1068343/2396597/3/,
+2 Jerzynathor/218/5/1/1/4/303/2/2/303/3/4/1/1/0//305/0/0/2/-183/0/0/0/0/0/0/0/0/0,
+3 1/26/287/625/1/3/2/453/0/0/2369722/0/-1/0/287/625/1/3/2/453/0/0/2369722/0,
+4 2/56/25/0/1/4/5/198/198/198/4802452/0/0/56/25/0/1/4/5/198/198/198/4802452/0,
+5 3,
+6 0,
+7 0,
+8 0,
+9 -1,
+save 1018553042/411526/1393341359/1365510919/-469780145/40/0/218/2598257/84305910/106609/2377/-1/451911773/106/1698/1614/4/303/2/2/303/3/4/1/1/0/5/257/1/1851/1074/1074/1562/1482/2679/1066/1601/2589/2569/1754/982/986/1468/1393/1/1/1393344908/6/53/2393/0/6/0/0/224/0/0/5723939/0/3/53/2698/0/6/0/0/216/0/0/159048892/0/5/55/2886/0/6/0/0/193/0/0/6768166/0/687865860/1966138/1642/0/1/4/5/238/238/238/15110172/0/1358954504/655415/0/0/6/0/0/195/0/0/3852930/0/7/58/1339/0/1/4/5/257/257/257/61245260/0/1526726665/655375/0/0/1/4/2/467/0/0/4782398/0/10/55/0/0/6/0/0/238/0/0/0/0/1/26/287/625/1/3/2/453/0/0/2369722/0/2/56/25/0/1/4/5/198/198/198/4802452/0/10/10/0/0/2/4/1/483/0/0/9794975/0/9/3/0/0/1/4/3/285/181/0/4456941/0/7/10/2038/0/5/4/3/249/217/0/14583120/0/4/10/2126/0/5/2/1/484/0/0/11802953/0/0/13/0/0/11/3/0/72/25/0/1233199/0/1393323257/218/218/218/6/4/1/-93/-43/-112/16/15/17/450/300/300/0/9/0/0/3/4/2/284/186/0/5477291/0/0/10/2126/0/5/2/1/484/0/0/11802953/0/0/8/1635/0/3/1/5/257/227/0/18331434/0/920200/423300/319000/3602600/4565700/6777200/917508/1393265479/1/26/470/518/1/4/5/249/243/0/18357409/1/3/10/1554/0/1/2/4/238/236/0/13379502/1/5/8/3504/0/3/2/5/246/224/0/32833824/10/6/8/3011/0/1/4/3/286/188/0/72182453/10/2/9/25/0/5/4/3/475/0/0/30457056/0/5/10/1990/0/4/5/3/279/187/0/168037050/0/1393265410/9/13/0/0/3/5/2/272/204/0/10614742/10/12/13/0/0/11/3/0/72/25/0/6165998/0/8/15/0/0/2/1/5/242/236/0/6165998/10/10/1/0/0/4/1/5/250/236/0/3493500/1/9/6/0/0/4/3/2/460/0/0/22440450/0/9/1/0/0/3/2/1/281/197/0/12588630/10/22/0/105577/3/928/11476/1027147/0/11/2/1365511321/0/0/0/10958/287/625/0/1394371566/1/0/0/1393311887/0/2/100/1393344959/1393288361/112/108/1/1365615633/218/100/976/7680/6222/1000000000/106609/1/0/79/0/0/4/1393341359/4/12/12/12/12/12/12/12/12/12/12/120/13/0/15/13/14/1393421145/1393524740/1393439869/25/25/25/0/563358386/580814597/580814597/150/1390756938/3/356/1393341359/]]
+ */
+        		int[] fighterData = strToIntArray(par[0]);
+        		int[] fightData = strToIntArray(par[1]);
+        		Fight f = new Fight();
+        		f.setStats(fighterData);
+        		f.setRounds(fightData);
+        		
+        		showFight(f, com);
+        		break;
 //            this.ShowFightScreen(par[0].split("/"), par[1].split("/"), (par[6] == "1"), par[2].split("/"), (par[5] == "2"), ((par[3] + "/") + par[4]).split("/"), int(par[7]), int(par[8]), (par[5] == "3"), false, int(par[9]));
 //            break;
 //        case Const.RESP_GUILD_FIGHT:
@@ -1202,6 +1253,43 @@ public class ResponseHandler {
 		return true;
 	}
 
+	private void showFight(Fight f, Commander com) {
+		com.print(String.format("Fight between:\n" +
+				"           %12s           %12s\n" +
+				" #_KHP #Z:  %10d           %10d\n" +
+				" #CSTR#Z:  #_W%8d#Z  #_W%8d#Z\n" +
+				" #YDEX#Z:  #_W%8d#Z  #_W%8d#Z\n" +
+				" #GINT#Z:  #_W%8d#Z  #_W%8d#Z\n" +
+				" #MEND#Z:  #_W%8d#Z  #_W%8d#Z\n" +
+				" #BLUC#Z:  #_W%8d#Z  #_W%8d#Z\n\n",
+				Fighter.YOU.getName(), Fighter.OPPONENT.getName(),
+				f.getCharStats().hp, f.getOppStats().hp,
+				f.getCharStats().str.getTotal(), f.getOppStats().str.getTotal(),
+				f.getCharStats().dex.getTotal(), f.getOppStats().dex.getTotal(),
+				f.getCharStats().intel.getTotal(), f.getOppStats().intel.getTotal(),
+				f.getCharStats().endur.getTotal(), f.getOppStats().endur.getTotal(),
+				f.getCharStats().luck.getTotal(), f.getOppStats().luck.getTotal()));
+
+		Fighter other = Fighter.YOU;
+		for(Round r: f.getRounds()) {
+			other = r.getWho().next();
+			com.print(String.format("%s %s %s for %d HP\n",
+				r.getWho(), r.getHit().action(r.getWho()), other.getName(), r.getDamage()
+			));
+		}
+		
+		com.print(String.format("%s won\n", other.next().getName()));
+	}
+
+	private int[] strToIntArray(String string) {
+		String[] strs = string.split("/");
+		int[] $ = new int[strs.length];
+		for (int i = 0; i < strs.length; i++) {
+			$[i] = parseInt(strs[i]);
+		}
+		return $;
+	}
+
 	private void parseSavegame(Game g, String sg) {
 		g.restoreFromSave(sg);
 	}
@@ -1211,7 +1299,7 @@ public class ResponseHandler {
 	}
 	
 	public int parseInt(String str) {
-		if (str == null) {
+		if (StringUtils.isEmpty(str)) {
 			return 0;
 		}
 		
