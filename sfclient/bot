@@ -1,4 +1,5 @@
 #!/bin/bash
 
-java -cp bin:lib/commons-lang3-3.1.jar:lib/jline-1.0.jar pl.codebrewery.sfgame.interfaces.WarBot "$@"
+nohup ./botRunner.sh &
+tail -f nohup.out
 
