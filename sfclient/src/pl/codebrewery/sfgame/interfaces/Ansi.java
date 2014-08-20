@@ -28,4 +28,8 @@ public enum Ansi {
 	public String getEsc() {
 		return esc;
 	}
+	
+	public String getCode() {
+		return "#" + this;
+	}
 }

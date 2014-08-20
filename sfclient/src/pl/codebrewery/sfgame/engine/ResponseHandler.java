@@ -12,7 +12,6 @@ import pl.codebrewery.sfgame.model.ChatLine;
 import pl.codebrewery.sfgame.model.Const;
 import pl.codebrewery.sfgame.model.Fight;
 import pl.codebrewery.sfgame.model.Fight.Fighter;
-import pl.codebrewery.sfgame.model.Fight.Round;
 import pl.codebrewery.sfgame.model.Game;
 
 public class ResponseHandler {
@@ -574,6 +573,7 @@ public class ResponseHandler {
         	gd.restoreFromSave(par[10]);
 //            this.PulseChar = false;
         case Const.RESP_QUEST_DONE:
+        case Const.RESP_PORTAL_FIGHT:
 //        case Const.RESP_QUEST_DONE_PIXEL:
 //            this.fightLock = true;
 //            this.PostFightMode = false;
@@ -1263,22 +1263,23 @@ save 1018553042/411526/1393341359/1365510919/-469780145/40/0/218/2598257/8430591
 				" #MEND#Z:  #_W%8d#Z  #_W%8d#Z\n" +
 				" #BLUC#Z:  #_W%8d#Z  #_W%8d#Z\n\n",
 				Fighter.YOU.getName(), Fighter.OPPONENT.getName(),
-				f.getCharStats().hp, f.getOppStats().hp,
-				f.getCharStats().str.getTotal(), f.getOppStats().str.getTotal(),
-				f.getCharStats().dex.getTotal(), f.getOppStats().dex.getTotal(),
-				f.getCharStats().intel.getTotal(), f.getOppStats().intel.getTotal(),
-				f.getCharStats().endur.getTotal(), f.getOppStats().endur.getTotal(),
-				f.getCharStats().luck.getTotal(), f.getOppStats().luck.getTotal()));
+				f.charStats.hp, f.oppStats.hp,
+				f.charStats.str.getTotal(), f.oppStats.str.getTotal(),
+				f.charStats.dex.getTotal(), f.oppStats.dex.getTotal(),
+				f.charStats.intel.getTotal(), f.oppStats.intel.getTotal(),
+				f.charStats.endur.getTotal(), f.oppStats.endur.getTotal(),
+				f.charStats.luck.getTotal(), f.oppStats.luck.getTotal()));
 
-		Fighter other = Fighter.YOU;
-		for(Round r: f.getRounds()) {
-			other = r.getWho().next();
+//		Fighter other = Fighter.YOU;
+		Fighter loser = f.rounds.stream().reduce(Fighter.YOU, (fi, r) -> {
+			Fighter other = r.who.next();
 			com.print(String.format("%s %s %s for %d HP\n",
-				r.getWho(), r.getHit().action(r.getWho()), other.getName(), r.getDamage()
+				r.who, r.hit.action(r.who), other.getName(), r.damage
 			));
-		}
+			return other;
+		}, (f1, f2) -> { return f2; });
 		
-		com.print(String.format("%s won\n", other.next().getName()));
+		com.print(String.format("%s won\n", loser.next().getName()));
 	}
 
 	private int[] strToIntArray(String string) {

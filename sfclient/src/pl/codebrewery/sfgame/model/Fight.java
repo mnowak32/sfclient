@@ -14,8 +14,8 @@ public class Fight {
 		CRITICAL(Ansi._R, "*devastate*", "*devastates*"),
 		CATAPULT(Ansi._G, "catapult shroom on", "catapults shroom on");
 		
-		private Ansi color;
-		private String you, opp;
+		public final Ansi color;
+		public final String you, opp;
 		
 		private HitType(Ansi c, String you, String opp) {
 			color = c;
@@ -30,10 +30,6 @@ public class Fight {
 			return values()[i];
 		}
 
-		public String getColor() {
-			return "#" + color;
-		}
-		
 		public String action(Fighter ft) {
 			if (ft == Fighter.OPPONENT) {
 				return opp;
@@ -64,9 +60,9 @@ public class Fight {
 	}
 	
 	public class Round {
-		int life, damage;
-		HitType hit;
-		Fighter who;
+		public int life, damage;
+		public HitType hit;
+		public Fighter who;
 		
 		Round(int life, int damage, HitType hit, Fighter who) {
 			this.life = life;
@@ -74,26 +70,10 @@ public class Fight {
 			this.hit = hit;
 			this.who = who;
 		}
-
-		public int getLife() {
-			return life;
-		}
-
-		public int getDamage() {
-			return damage;
-		}
-
-		public HitType getHit() {
-			return hit;
-		}
-
-		public Fighter getWho() {
-			return who;
-		}
 	}
 
-	private List<Round> rounds = new LinkedList<>();
-	private Stats charStats, oppStats;
+	public List<Round> rounds = new LinkedList<>();
+	public Stats charStats, oppStats;
 	
 	public void setRounds(int[] fightData) {
 		if (fightData.length < 6) { //dmuchamy na zimne
@@ -118,17 +98,4 @@ public class Fight {
 		charStats = new Stats(fighterData[0], fighterData[1], fighterData[2], fighterData[3], fighterData[4], fighterData[5]);
 		oppStats = new Stats(fighterData[6], fighterData[7], fighterData[8], fighterData[9], fighterData[10], fighterData[11]);
 	}
-
-	public List<Round> getRounds() {
-		return rounds;
-	}
-
-	public Stats getCharStats() {
-		return charStats;
-	}
-
-	public Stats getOppStats() {
-		return oppStats;
-	}
-	
 }

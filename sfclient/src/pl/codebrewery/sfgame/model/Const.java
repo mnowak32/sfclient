@@ -84,6 +84,8 @@ public class Const {
     public static final int ACT_CHANGE_NAME = 803;
     public static final int ACT_CHANGE_MAIL = 804;
     public static final int ACT_CHANGE_PASS = 805;
+    public static final int ACT_PORTAL_FIGHT = 358;
+    public static final int ACT_PORTAL_FIGHT_SINGLE = 360;
 
     
     public static final int RESP_ACCOUNT_SUCCESS = 1;
@@ -164,6 +166,8 @@ public class Const {
     public static final int RESP_READ_MESSAGE = 201;
     public static final int RESP_MESSAGE_SENT = 202;
     public static final int REPS_TOILET_DROPTWICE = 357;
+    public static final int RESP_PORTAL_FIGHT = 359;
+    public static final int RESP_PORTAL_FIGHT_SINGLE = 361;
 
     
     public static final int ERR_DEALER_AKTION = 175;

@@ -38,18 +38,29 @@ public class WarBot implements Commander {
 	private void botTask() {
 		relogin();
 		getGuildData();
-		if (gd.getGuild().isAttacking() && !gd.getGuild().isAttackJoined()) {
-			print("Guild is attacking, joining!");
-			joinAttack();
-		}
-		if (gd.getGuild().isDefending() && !gd.getGuild().isDefenseJoined()) {
-			print("Guild is defending, joining!");
-			joinDefense();
+//		if (gd.getGuild().isAttacking() && !gd.getGuild().isAttackJoined()) {
+//			print("Guild is attacking, joining!");
+//			joinAttack();
+//		}
+//		if (gd.getGuild().isDefending() && !gd.getGuild().isDefenseJoined()) {
+//			print("Guild is defending, joining!");
+//			joinDefense();
+//		}
+		if (gd.getGuild().isPortalOpen(gd.getPlayerId())) {
+			print("Guild portal is open, entering!!!");
+			enterGuildPortal();
 		}
 		logout();
 	}
 	
 	
+	private void enterGuildPortal() {
+		System.out.println("Entering portal....");
+		Response resp = net.call(Const.ACT_PORTAL_FIGHT, gd.getSessionId());
+		rh.handleResponse(resp, this);
+		
+	}
+
 	private void joinAttack() {
 		Response resp = net.call(Const.ACT_GUILD_JOIN_ATTACK, gd.getSessionId());
 		rh.handleResponse(resp, this);
