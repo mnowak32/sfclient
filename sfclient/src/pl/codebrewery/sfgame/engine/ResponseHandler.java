@@ -1270,13 +1270,12 @@ save 1018553042/411526/1393341359/1365510919/-469780145/40/0/218/2598257/8430591
 				f.charStats.endur.getTotal(), f.oppStats.endur.getTotal(),
 				f.charStats.luck.getTotal(), f.oppStats.luck.getTotal()));
 
-//		Fighter other = Fighter.YOU;
 		Fighter loser = f.rounds.stream().reduce(Fighter.YOU, (fi, r) -> {
 			Fighter other = r.who.next();
 			com.print(String.format("%s %s %s for %d HP\n",
 				r.who, r.hit.action(r.who), other.getName(), r.damage
 			));
-			return other;
+			return r.who;
 		}, (f1, f2) -> { return f2; });
 		
 		com.print(String.format("%s won\n", loser.next().getName()));

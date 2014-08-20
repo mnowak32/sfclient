@@ -38,16 +38,16 @@ public class WarBot implements Commander {
 	private void botTask() {
 		relogin();
 		getGuildData();
-//		if (gd.getGuild().isAttacking() && !gd.getGuild().isAttackJoined()) {
-//			print("Guild is attacking, joining!");
-//			joinAttack();
-//		}
-//		if (gd.getGuild().isDefending() && !gd.getGuild().isDefenseJoined()) {
-//			print("Guild is defending, joining!");
-//			joinDefense();
-//		}
+		if (gd.getGuild().isAttacking() && !gd.getGuild().isAttackJoined()) {
+			print("Guild is attacking, joining!\n");
+			joinAttack();
+		}
+		if (gd.getGuild().isDefending() && !gd.getGuild().isDefenseJoined()) {
+			print("Guild is defending, joining!\n");
+			joinDefense();
+		}
 		if (gd.getGuild().isPortalOpen(gd.getPlayerId())) {
-			print("Guild portal is open, entering!!!");
+			print("Guild portal is open, entering!\n");
 			enterGuildPortal();
 		}
 		logout();
@@ -55,7 +55,7 @@ public class WarBot implements Commander {
 	
 	
 	private void enterGuildPortal() {
-		System.out.println("Entering portal....");
+		System.out.println("Entering portal....\n");
 		Response resp = net.call(Const.ACT_PORTAL_FIGHT, gd.getSessionId());
 		rh.handleResponse(resp, this);
 		
@@ -83,7 +83,7 @@ public class WarBot implements Commander {
 		
 		Response resp = net.call(Const.ACT_LOGIN, null, gd.getLogin(), hash, Game.VERSION);
 		if (rh.handleResponse(resp, this) == false || resp.isError()) { //zwrot false oznacza: błąd kytyczny, spierdalamy!
-			print("#_RCritical error, aborting!");
+			print("#_RCritical error, aborting!\n");
 			return;
 		}
 		
@@ -96,14 +96,14 @@ public class WarBot implements Commander {
 	public void logout() {
 		Response resp = net.call(Const.ACT_LOGOUT, gd.getSessionId());
 		if (rh.handleResponse(resp, this) == false || resp.isError()) { //zwrot false oznacza: błąd kytyczny, spierdalamy!
-			print("#_RCritical error, aborting!");
+			print("#_RCritical error, aborting!\n");
 			return;
 		}
 	}
 
 	@Override
 	public void nullResponse() {
-		print("NULL response");
+		print("NULL response\n");
 	}
 
 	@Override
@@ -111,7 +111,7 @@ public class WarBot implements Commander {
 		for (Ansi a : Ansi.values()) {
 			out = out.replaceAll("#" + a.toString(), "");
 		}
-		System.out.println(out);
+		System.out.print(out);
 	}
 	
 }
