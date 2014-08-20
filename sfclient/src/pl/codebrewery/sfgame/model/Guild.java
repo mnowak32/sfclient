@@ -6,7 +6,6 @@ import java.util.Optional;
 
 public class Guild {
 
-	private static final long MILLIS_PER_DAY = 24 * 60 * 60 * 1000;
 	private boolean attacking, defending;
 	private boolean attackJoined, defenseJoined;
 	
@@ -129,14 +128,8 @@ public class Guild {
 
 	public boolean isPortalOpen(int myId) {
 		return getMember(myId).map(m -> {
-			return !isToday(m.lastPortalVisit);
+			return !Game.isToday(m.lastPortalVisit);
 		}).orElse(false);
-	}
-	
-	private boolean isToday(int ts) {
-		long timeStamp = ts * 1000l / MILLIS_PER_DAY;
-		long today = System.currentTimeMillis() / MILLIS_PER_DAY;
-		return today <= timeStamp; 
 	}
 	
 	public Optional<Member> getMember(int id) {

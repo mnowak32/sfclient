@@ -1,5 +1,6 @@
 package pl.codebrewery.sfgame.model;
 
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.TreeMap;
@@ -8,6 +9,7 @@ import pl.codebrewery.sfgame.engine.Net;
 import pl.codebrewery.sfgame.engine.ResponseHandler;
 
 public class Game {
+	private static final long MILLIS_PER_DAY = 24 * 60 * 60 * 1000;
 
 	public static final String VERSION = "v1.70";
 	public static final int CONTENT_MAX = 1700;
@@ -25,7 +27,8 @@ public class Game {
 	private int level;
 	
 	private int playerId, guildId;
-	private int playerClass, gender;
+	public int playerClass;
+	private int gender;
 	
 	private String guildName;
 	
@@ -49,6 +52,7 @@ public class Game {
 	
 	private Chat chat = new Chat();
 	private Guild guild = new Guild();
+	public int lastPortalVisit;
 	
 	public static class Attr {
 		private int base, bonus, bought;
@@ -121,7 +125,9 @@ public class Game {
 		
 		playerId = Integer.parseInt(saveGame[Const.SG_PLAYER_ID]);
 		guildId = Integer.parseInt(saveGame[Const.SG_GUILD_INDEX]);
-		playerClass = Integer.parseInt(saveGame[Const.SG_CLASS]);
+		long playerClassAndPortal = Long.parseLong(saveGame[Const.SG_CLASS]);
+		lastPortalVisit = (int)(playerClassAndPortal >> 16);
+		playerClass = (int)(playerClassAndPortal & 65535);
 		int gender = Integer.parseInt(saveGame[Const.SG_GENDER]);
 		String flags = toBinStr(gender, 32);
 		
@@ -244,14 +250,6 @@ public class Game {
 
 	public void setGuildId(int guildId) {
 		this.guildId = guildId;
-	}
-
-	public int getPlayerClass() {
-		return playerClass;
-	}
-
-	public void setPlayerClass(int playerClass) {
-		this.playerClass = playerClass;
 	}
 
 	public int getGender() {
@@ -515,9 +513,18 @@ public class Game {
 	public Stats getStats() {
 		return stats;
 	}
-
 	
+	public boolean isPortalOpen() {
+		return !Game.isTodayDoy(lastPortalVisit);
+	}
 	
+	public static boolean isToday(int ts) {
+		long timeStamp = ts * 1000l / MILLIS_PER_DAY;
+		long today = System.currentTimeMillis() / MILLIS_PER_DAY;
+		return today <= timeStamp; 
+	}
 	
-	
+	public static boolean isTodayDoy(int doy) {
+		return doy == LocalDateTime.now().getDayOfYear();
+	}
 }

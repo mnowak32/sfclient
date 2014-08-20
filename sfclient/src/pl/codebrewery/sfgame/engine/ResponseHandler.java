@@ -574,6 +574,7 @@ public class ResponseHandler {
 //            this.PulseChar = false;
         case Const.RESP_QUEST_DONE:
         case Const.RESP_PORTAL_FIGHT:
+        case Const.RESP_PORTAL_FIGHT_SINGLE:
 //        case Const.RESP_QUEST_DONE_PIXEL:
 //            this.fightLock = true;
 //            this.PostFightMode = false;
@@ -1270,7 +1271,7 @@ save 1018553042/411526/1393341359/1365510919/-469780145/40/0/218/2598257/8430591
 				f.charStats.endur.getTotal(), f.oppStats.endur.getTotal(),
 				f.charStats.luck.getTotal(), f.oppStats.luck.getTotal()));
 
-		Fighter loser = f.rounds.stream().reduce(Fighter.YOU, (fi, r) -> {
+		Fighter winner = f.rounds.stream().reduce(Fighter.YOU, (fi, r) -> {
 			Fighter other = r.who.next();
 			com.print(String.format("%s %s %s for %d HP\n",
 				r.who, r.hit.action(r.who), other.getName(), r.damage
@@ -1278,7 +1279,7 @@ save 1018553042/411526/1393341359/1365510919/-469780145/40/0/218/2598257/8430591
 			return r.who;
 		}, (f1, f2) -> { return f2; });
 		
-		com.print(String.format("%s won\n", loser.next().getName()));
+		com.print(String.format("%s won\n", winner.getName()));
 	}
 
 	private int[] strToIntArray(String string) {

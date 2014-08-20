@@ -50,10 +50,20 @@ public class WarBot implements Commander {
 			print("Guild portal is open, entering!\n");
 			enterGuildPortal();
 		}
+		if (gd.isPortalOpen()) {
+			print("Single portal is open, entering!\n");
+			enterSinglePortal();
+		}
 		logout();
 	}
 	
 	
+	private void enterSinglePortal() {
+		System.out.println("Entering portal....\n");
+		Response resp = net.call(Const.ACT_PORTAL_FIGHT_SINGLE, gd.getSessionId());
+		rh.handleResponse(resp, this);
+	}
+
 	private void enterGuildPortal() {
 		System.out.println("Entering portal....\n");
 		Response resp = net.call(Const.ACT_PORTAL_FIGHT, gd.getSessionId());
