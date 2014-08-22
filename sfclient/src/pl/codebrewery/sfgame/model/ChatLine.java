@@ -45,6 +45,11 @@ public class ChatLine {
 			@Override public String format(String[] parts) {
 				return "#B" + parts[2] + "#Z has reached level " + parts[3];
 			}
+		}),
+		PORTAL("po", new Formatter() {
+			@Override public String format(String[] parts) {
+				return "#B" + parts[2] + "#Z entered Portal #_Y" + parts[3] + "#Z dealing #_R" + parts[4] + "#Z damage. " + parts[5] + "% of demon's life left.";
+			}
 		});
 		
 		private String idString;

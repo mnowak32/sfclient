@@ -38,15 +38,15 @@ public class WarBot implements Commander {
 	private void botTask() {
 		relogin();
 		getGuildData();
-		if (gd.getGuild().isAttacking() && !gd.getGuild().isAttackJoined()) {
+		if (gd.guild.attacking && !gd.guild.attackJoined) {
 			print("Guild is attacking, joining!\n");
 			joinAttack();
 		}
-		if (gd.getGuild().isDefending() && !gd.getGuild().isDefenseJoined()) {
+		if (gd.guild.defending && !gd.guild.defenseJoined) {
 			print("Guild is defending, joining!\n");
 			joinDefense();
 		}
-		if (gd.getGuild().isPortalOpen(gd.getPlayerId())) {
+		if (gd.guild.isPortalOpen(gd.getPlayerId())) {
 			print("Guild portal is open, entering!\n");
 			enterGuildPortal();
 		}
@@ -54,6 +54,7 @@ public class WarBot implements Commander {
 			print("Single portal is open, entering!\n");
 			enterSinglePortal();
 		}
+		//TODO: wchodzenie do lochów
 		logout();
 	}
 	

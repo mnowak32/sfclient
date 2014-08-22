@@ -57,6 +57,11 @@ public class Fight {
 		public String getName() {
 			return String.format("#%s%s#%s", color, this, Ansi.Z);
 		}
+		
+		//helper lambda
+		public static Fighter winner(Fighter f1, Fighter f2) {
+			return f2;
+		}
 	}
 	
 	public class Round {
@@ -79,7 +84,7 @@ public class Fight {
 		if (fightData.length < 6) { //dmuchamy na zimne
 			return;
 		}
-		Fighter who = Fighter.YOU;
+		Fighter who = Fighter.YOU; //tu jest coś nie tak...
 		
 		for (int i = 0; i < fightData.length; i += 3) {
 			if (i == 0 && fightData[i + 1] == 0 && fightData[i + 2] == 0) { //zaczyna drugi zawodnik...

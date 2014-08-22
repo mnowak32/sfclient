@@ -51,7 +51,7 @@ public class Game {
 	private int albumItems;
 	
 	private Chat chat = new Chat();
-	private Guild guild = new Guild();
+	public Guild guild = new Guild();
 	public int lastPortalVisit;
 	
 	public static class Attr {
@@ -488,10 +488,6 @@ public class Game {
 
 	public Chat getChat() {
 		return chat;
-	}
-
-	public Guild getGuild() {
-		return guild;
 	}
 
 	public long getDungeonLevel() {

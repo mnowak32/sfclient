@@ -6,10 +6,10 @@ import java.util.Optional;
 
 public class Guild {
 
-	private boolean attacking, defending;
-	private boolean attackJoined, defenseJoined;
+	public boolean attacking, defending;
+	public boolean attackJoined, defenseJoined;
 	
-	private List<Member> members = new LinkedList<>();
+	private final List<Member> members = new LinkedList<>();
 	public int portalDay, portalLife, portalLifePercent, portalLevel;
 	
 	public class Member {
@@ -26,38 +26,6 @@ public class Guild {
 					"\nMember [name=%s, id=%s, level=%s, online=%s, lastPortalVisit=%s, goldSpent=%s, shroomsSpent=%s, rank=%s, attackReady=%s, defenseReady=%s]",
 					name, id, level, online, lastPortalVisit, goldSpent, shroomsSpent, rank, attackReady, defenseReady);
 		}
-	}
-
-	public boolean isAttacking() {
-		return attacking;
-	}
-
-	public void setAttacking(boolean attacking) {
-		this.attacking = attacking;
-	}
-
-	public boolean isDefending() {
-		return defending;
-	}
-
-	public void setDefending(boolean defending) {
-		this.defending = defending;
-	}
-
-	public boolean isDefenseJoined() {
-		return defenseJoined;
-	}
-
-	public void setDefenseJoined(boolean defenseJoined) {
-		this.defenseJoined = defenseJoined;
-	}
-
-	public boolean isAttackJoined() {
-		return attackJoined;
-	}
-
-	public void setAttackJoined(boolean attackJoined) {
-		this.attackJoined = attackJoined;
 	}
 
 	public void restoreFromSave(String save) {

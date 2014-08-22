@@ -2,6 +2,7 @@ package pl.codebrewery.sfgame.engine;
 
 import java.util.Arrays;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.xml.bind.DatatypeConverter;
 
@@ -699,8 +700,8 @@ save 1018553042/411526/1393341359/1365510919/-469780145/40/0/218/2598257/8430591
 //            break;
         case Const.ACT_SCREEN_GILDEN:
         	//System.out.println(par[0]);
-        	gd.getGuild().restoreFromSave(par[0]);
-        	gd.getGuild().checkOwnReadiness(gd.getPlayerId());
+        	gd.guild.restoreFromSave(par[0]);
+        	gd.guild.checkOwnReadiness(gd.getPlayerId());
         	//System.out.println(gd.getGuild());
         	break;
 //            this.Savegame[this.SG_GUILD_INDEX] = par[0].split("/")[0];
@@ -1255,31 +1256,56 @@ save 1018553042/411526/1393341359/1365510919/-469780145/40/0/218/2598257/8430591
 	}
 
 	private void showFight(Fight f, Commander com) {
-		com.print(String.format("Fight between:\n" +
-				"           %12s           %12s\n" +
-				" #_KHP #Z:  %10d           %10d\n" +
-				" #CSTR#Z:  #_W%8d#Z  #_W%8d#Z\n" +
-				" #YDEX#Z:  #_W%8d#Z  #_W%8d#Z\n" +
-				" #GINT#Z:  #_W%8d#Z  #_W%8d#Z\n" +
-				" #MEND#Z:  #_W%8d#Z  #_W%8d#Z\n" +
-				" #BLUC#Z:  #_W%8d#Z  #_W%8d#Z\n\n",
-				Fighter.YOU.getName(), Fighter.OPPONENT.getName(),
-				f.charStats.hp, f.oppStats.hp,
-				f.charStats.str.getTotal(), f.oppStats.str.getTotal(),
-				f.charStats.dex.getTotal(), f.oppStats.dex.getTotal(),
-				f.charStats.intel.getTotal(), f.oppStats.intel.getTotal(),
-				f.charStats.endur.getTotal(), f.oppStats.endur.getTotal(),
-				f.charStats.luck.getTotal(), f.oppStats.luck.getTotal()));
+		com.print(String.format(
+			"Fight between:\n" +
+			"           %12s           %12s\n" +
+			" #_KHP #Z:  %10d           %10d\n" +
+			" #CSTR#Z:  #_W%8d#Z  #_W%8d#Z\n" +
+			" #YDEX#Z:  #_W%8d#Z  #_W%8d#Z\n" +
+			" #GINT#Z:  #_W%8d#Z  #_W%8d#Z\n" +
+			" #MEND#Z:  #_W%8d#Z  #_W%8d#Z\n" +
+			" #BLUC#Z:  #_W%8d#Z  #_W%8d#Z\n\n",
+			Fighter.YOU.getName(), Fighter.OPPONENT.getName(),
+			f.charStats.hp, f.oppStats.hp,
+			f.charStats.str.getTotal(), f.oppStats.str.getTotal(),
+			f.charStats.dex.getTotal(), f.oppStats.dex.getTotal(),
+			f.charStats.intel.getTotal(), f.oppStats.intel.getTotal(),
+			f.charStats.endur.getTotal(), f.oppStats.endur.getTotal(),
+			f.charStats.luck.getTotal(), f.oppStats.luck.getTotal()
+		));
 
-		Fighter winner = f.rounds.stream().reduce(Fighter.YOU, (fi, r) -> {
+		Fighter winner = f.rounds.stream().map(r -> {
 			Fighter other = r.who.next();
+//			com.print(String.format(" #_KHP #Z:  %10d           %10d\n", r.damage));
 			com.print(String.format("%s %s %s for %d HP\n",
 				r.who, r.hit.action(r.who), other.getName(), r.damage
 			));
 			return r.who;
-		}, (f1, f2) -> { return f2; });
-		
+		}).reduce(Fighter::winner).get();
 		com.print(String.format("%s won\n", winner.getName()));
+
+		
+		Map<Fighter, Integer> totalDamages = Arrays.stream(Fighter.values()).collect(
+			Collectors.<Fighter, Fighter, Integer>toMap(
+				ft -> ft, //keyMapper (fighter -> fighter, could be identity)
+				ft -> { //valueMapper (fighter -> totalDamage)
+					return f.rounds.stream().filter(r -> (r.who == ft)).reduce(
+						0, //initial value
+						(total, r) -> total + r.damage, //accumulator (sum of total damage and round damage)
+						(i1, i2) -> i1 + i2 // combinator (for non-sequential processing purposes)
+					);
+				}
+			)
+		);
+		com.print(String.format(
+			"Summary:\n" +
+			" #_KHP #Z:  %10d           %10d\n" +
+			" #_RDMG#Z:  %10d           %10d\n" +
+			" #_YLFT#Z:  %10d           %10d\n",
+			f.charStats.hp, f.oppStats.hp,
+			totalDamages.get(Fighter.YOU), totalDamages.get(Fighter.OPPONENT),
+			f.charStats.hp - totalDamages.get(Fighter.OPPONENT), f.oppStats.hp - totalDamages.get(Fighter.YOU)
+		));
 	}
 
 	private int[] strToIntArray(String string) {
