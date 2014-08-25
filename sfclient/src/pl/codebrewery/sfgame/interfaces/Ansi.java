@@ -19,16 +19,12 @@ public enum Ansi {
 	_C("\u001B[36;1m"), // cyan
 	_W("\u001B[37;1m"); // white
 
-	private String esc;
+	public String esc;
 
 	private Ansi(String e) {
 		esc = e;
 	}
 
-	public String getEsc() {
-		return esc;
-	}
-	
 	public String getCode() {
 		return "#" + this;
 	}

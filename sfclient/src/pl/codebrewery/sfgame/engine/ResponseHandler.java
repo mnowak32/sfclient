@@ -618,6 +618,7 @@ save 1018553042/411526/1393341359/1365510919/-469780145/40/0/218/2598257/8430591
         		Fight f = new Fight();
         		f.setStats(fighterData);
         		f.setRounds(fightData);
+        		gd.db.saveFight(gd, par[0], par[1]);
         		
         		showFight(f, com);
         		break;

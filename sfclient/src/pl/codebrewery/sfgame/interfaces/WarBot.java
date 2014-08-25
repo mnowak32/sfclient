@@ -54,11 +54,20 @@ public class WarBot implements Commander {
 			print("Single portal is open, entering!\n");
 			enterSinglePortal();
 		}
-		//TODO: wchodzenie do lochów
+		if (!gd.isDungeonWait()) {
+			print("Can enter dungeon, so....\n");
+			enterDungeon();
+		}
 		logout();
 	}
 	
 	
+	private void enterDungeon() {
+		System.out.println("Entering dungeon " + gd.dungeonEnterLevel + "....\n");
+		Response resp = net.call(Const.ACT_MAINQUEST, gd.getSessionId(), Integer.toString(gd.dungeonEnterLevel));
+		rh.handleResponse(resp, this);
+	}
+
 	private void enterSinglePortal() {
 		System.out.println("Entering portal....\n");
 		Response resp = net.call(Const.ACT_PORTAL_FIGHT_SINGLE, gd.getSessionId());

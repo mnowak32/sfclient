@@ -7,6 +7,7 @@ import java.util.TreeMap;
 
 import pl.codebrewery.sfgame.engine.Net;
 import pl.codebrewery.sfgame.engine.ResponseHandler;
+import pl.codebrewery.sfgame.engine.Store;
 
 public class Game {
 	private static final long MILLIS_PER_DAY = 24 * 60 * 60 * 1000;
@@ -16,15 +17,15 @@ public class Game {
 	
 	public static final Game I = new Game();
 	public Net net = new Net();
+	public Store db = new Store();
 	public ResponseHandler rh = new ResponseHandler();
 	
-	
-	private String login, password;
+	public String login, password;
 	private String sessionId;
 	private long gameTime, serverTime;
 	private long serverDeltaT;
 	
-	private int level;
+	public int level;
 	
 	private int playerId, guildId;
 	public int playerClass;
@@ -34,12 +35,32 @@ public class Game {
 	
 	private boolean[] mirrorParts = new boolean[13];
 	private boolean hasMirror, canRob;
-	private long towerLevel, dungeonLevel, dungeon13;
-	private int mount, shroom;
-	private long gold, exp, expNext;
+	public long towerLevel;
+	public Dungeon[] dungeons = new Dungeon[] {
+		new Dungeon(1, 0, false),
+		new Dungeon(2, 0, false),
+		new Dungeon(3, 0, false),
+		new Dungeon(4, 0, false),
+		new Dungeon(5, 0, false),
+		new Dungeon(6, 0, false),
+		new Dungeon(7, 0, false),
+		new Dungeon(8, 0, false),
+		new Dungeon(9, 0, false),
+		new Dungeon(10, 0, false),
+		new Dungeon(11, 0, false),
+		new Dungeon(12, 0, false),
+		new Dungeon(13, 0, false),
+	};
+	
+	public int dungeonEnterLevel;
+	public long dungeonWait;
+	private int mount;
+
+	public int shroom;
+	public long gold, exp, expNext;
 	
 	private Stats stats = new Stats();
-	private long action, actionCountdown;
+	public long action, actionCountdown;
 	private boolean newChat = false;
 	
 	private int questTime;
@@ -53,6 +74,8 @@ public class Game {
 	private Chat chat = new Chat();
 	public Guild guild = new Guild();
 	public int lastPortalVisit;
+
+	public int fightsToday;
 	
 	public static class Attr {
 		private int base, bonus, bought;
@@ -127,7 +150,7 @@ public class Game {
 		guildId = Integer.parseInt(saveGame[Const.SG_GUILD_INDEX]);
 		long playerClassAndPortal = Long.parseLong(saveGame[Const.SG_CLASS]);
 		lastPortalVisit = (int)(playerClassAndPortal >> 16);
-		playerClass = (int)(playerClassAndPortal & 65535);
+		playerClass = (int)(playerClassAndPortal & 0xffff);
 		int gender = Integer.parseInt(saveGame[Const.SG_GENDER]);
 		String flags = toBinStr(gender, 32);
 		
@@ -142,12 +165,44 @@ public class Game {
 		int mount = Integer.parseInt(saveGame[Const.SG_MOUNT]);
 		towerLevel = mount >> 16;
 		this.mount = mount & 0xffff;
+
+		int[] dungeonsSlots = new int[] {
+			Const.SG_DUNGEON_LEVEL + 0,
+			Const.SG_DUNGEON_LEVEL + 1,
+			Const.SG_DUNGEON_LEVEL + 2,
+			Const.SG_DUNGEON_LEVEL + 3,
+			Const.SG_DUNGEON_LEVEL + 4,
+			Const.SG_DUNGEON_LEVEL + 5,
+			Const.SG_DUNGEON_LEVEL + 6,
+			Const.SG_DUNGEON_LEVEL + 7,
+			Const.SG_DUNGEON_LEVEL + 8,
+			Const.SG_DUNGEON_LEVEL + 9,
+			Const.SG_NEW_DUNGEONS + 0,
+			Const.SG_NEW_DUNGEONS + 1,
+		};
 		
-		dungeonLevel = Long.parseLong(saveGame[Const.SG_DUNGEON_LEVEL]);
-		dungeon13 = Long.parseLong(saveGame[Const.SG_DUNGEON_13]);
+		for (int i = 0; i < 12; i++) {
+			Dungeon d = dungeons[i];
+			int ene = Integer.parseInt(saveGame[dungeonsSlots[i]]);
+			d.enemy = ene;
+			d.finished = ene > 10;
+		}
+		int dun13 = Integer.parseInt(saveGame[Const.SG_DUNGEON_13]);
+		if (dun13 > 120) {
+			dungeons[12].enemy = dun13 - 121;
+			dungeons[12].finished = (dun13 > 131); 
+		}
 		
-		level = Integer.parseInt(saveGame[Const.SG_LEVEL]);
-		gold = Long.parseLong(saveGame[Const.SG_GOLD]);
+		dungeonEnterLevel = Arrays.stream(dungeons).filter(d -> !d.finished).findFirst().orElse(new Dungeon(0, 0, false)).level;
+		System.out.println("to enter: " + dungeonEnterLevel);
+		
+		dungeonWait = Long.parseLong(saveGame[Const.SG_MQ_REROLL_TIME]);
+		
+		int level = Integer.parseInt(saveGame[Const.SG_LEVEL]);
+        fightsToday = level >> 16;
+        this.level = level & 0xffff;
+
+        gold = Long.parseLong(saveGame[Const.SG_GOLD]);
 		shroom = Integer.parseInt(saveGame[Const.SG_MUSH]);
 		exp = Long.parseLong(saveGame[Const.SG_EXP]);
 		expNext = Long.parseLong(saveGame[Const.SG_EXP_FOR_NEXTLEVEL]);
@@ -177,7 +232,9 @@ public class Game {
 		bought = Integer.parseInt(saveGame[Const.SG_ATTR_WILLENSKRAFT_GEKAUFT]);
 		stats.luck = new Attr(base, bonus, bought);
 		
-		action = Long.parseLong(saveGame[Const.SG_ACTION_STATUS]);
+		long action = Long.parseLong(saveGame[Const.SG_ACTION_STATUS]);
+		//cośtam z portalem = action >> 16;
+		this.action = action & 0xffff;
 		actionCountdown = Long.parseLong(saveGame[Const.SG_ACTION_ENDTIME]);
 		
 		questTime = Integer.parseInt(saveGame[Const.SG_TIMEBAR]);
@@ -302,54 +359,6 @@ public class Game {
 		this.mount = mount;
 	}
 
-	public long getTowerLevel() {
-		return towerLevel;
-	}
-
-	public void setTowerLevel(long towerLevel) {
-		this.towerLevel = towerLevel;
-	}
-
-	public int getLevel() {
-		return level;
-	}
-
-	public void setLevel(int level) {
-		this.level = level;
-	}
-
-	public long getGold() {
-		return gold;
-	}
-
-	public void setGold(long gold) {
-		this.gold = gold;
-	}
-
-	public int getShroom() {
-		return shroom;
-	}
-
-	public void setShroom(int shroom) {
-		this.shroom = shroom;
-	}
-
-	public long getExp() {
-		return exp;
-	}
-
-	public void setExp(long exp) {
-		this.exp = exp;
-	}
-
-	public long getExpNext() {
-		return expNext;
-	}
-
-	public void setExpNext(long expNext) {
-		this.expNext = expNext;
-	}
-
 	public String getGuildName() {
 		return guildName;
 	}
@@ -396,22 +405,6 @@ public class Game {
 
 	public void setLuck(Attr luck) {
 		this.stats.luck = luck;
-	}
-
-	public long getAction() {
-		return action;
-	}
-
-	public void setAction(long action) {
-		this.action = action;
-	}
-
-	public long getActionCountdown() {
-		return actionCountdown;
-	}
-
-	public void setActionCountdown(long actionCountdown) {
-		this.actionCountdown = actionCountdown;
 	}
 
 	public long getGameTime() {
@@ -490,28 +483,17 @@ public class Game {
 		return chat;
 	}
 
-	public long getDungeonLevel() {
-		return dungeonLevel;
-	}
-
-	public void setDungeonLevel(long dungeonLevel) {
-		this.dungeonLevel = dungeonLevel;
-	}
-
-	public long getDungeon13() {
-		return dungeon13;
-	}
-
-	public void setDungeon13(long dungeon13) {
-		this.dungeon13 = dungeon13;
-	}
-
 	public Stats getStats() {
 		return stats;
 	}
 	
 	public boolean isPortalOpen() {
 		return !Game.isTodayDoy(lastPortalVisit);
+	}
+	
+	public boolean isDungeonWait() {
+//		System.out.println("dungeonWait: " + dungeonWait);
+		return (dungeonWait > getSysTime());
 	}
 	
 	public static boolean isToday(int ts) {
@@ -523,4 +505,9 @@ public class Game {
 	public static boolean isTodayDoy(int doy) {
 		return doy == LocalDateTime.now().getDayOfYear();
 	}
+
+	public long getSysTime() {
+		return (System.currentTimeMillis() + serverDeltaT) / 1000;
+	}
+
 }

@@ -24,6 +24,7 @@ public class Cli implements Commander {
 	private ConsoleReader con;
 
 	private boolean keepGoing;
+	private long sysTime;
 
 	public static void main(String[] args) throws IOException {
 		if (args.length < 3) {
@@ -51,6 +52,7 @@ public class Cli implements Commander {
 		relogin();
 		
 		while (keepGoing) {
+			sysTime = gd.getSysTime();
 			print(getPrompt());
 			String line = con.readLine();
 			keepGoing = cp.parseCommand(line, this); 
@@ -65,8 +67,9 @@ public class Cli implements Commander {
 //			keepGoing = false;
 //			return;
 //		}
-
-		Response resp = net.call(new Request(Const.ACT_LOGIN, null, gd.getLogin(), Md5.hash(gd.getPassword()), Game.VERSION));
+		String hash = gd.getPassword().matches("^[0-9a-f]{32}$") ? gd.getPassword() : Md5.hash(gd.getPassword());
+		
+		Response resp = net.call(new Request(Const.ACT_LOGIN, null, gd.getLogin(), hash, Game.VERSION));
 		if (rh.handleResponse(resp, this) == false || resp.isError()) { //zwrot false oznacza: błąd kytyczny, spierdalamy!
 			print("#_RCritical error, aborting!");
 			keepGoing = false;
@@ -100,21 +103,33 @@ public class Cli implements Commander {
 
 	
 	private String getPrompt() {
-		return String.format("\n%s[#_G%s#Z] [LVL #_B%d#Z EXP #_W%d#Z/#_W%d#Z] (G #_Y%d#Z S #W%d#Z M #Y%d#Z) " +
-			"[%s] {%s} > ",
-			gd.getLogin(), gd.getGuildName(), gd.getLevel(), gd.getExp(), gd.getExpNext(), gd.getGold() / 100, gd.getGold() % 100, gd.getShroom(),
-			getActionStatus(), getFlags());
+		return String.format("\n%s[#_G%s#Z] [LVL #_B%d#Z EXP #_W%d%%#Z] (G #_Y%d#Z,#W%d#Z M #Y%d#Z) " +
+			"%s%s{%s} > ",
+			gd.getLogin(), gd.getGuildName(), gd.level, (gd.exp * 100 / gd.expNext), gd.gold / 100, gd.gold % 100, gd.shroom,
+			getActionStatus(), getDungeonStatus(), getFlags());
 	}
 	
-	private String getActionStatus() {
-		if (gd.getAction() == 0) {
-			return "---";
-		}
-		long deltaT = gd.getActionCountdown() - (int)((System.currentTimeMillis() + gd.getServerDeltaT()) / 1000);
+	private String getDungeonStatus() {
+		long deltaT = gd.dungeonWait - sysTime;
 		if (deltaT > 0) {
-			return String.format("@%s, #_W%02d:%02d:%02d#Z left", gd.getAction() == 1 ? "#_RWORK#Z" : "#_GQUEST#Z", deltaT / 3600, deltaT % 3600 / 60, deltaT % 60);
+			return String.format("(#BDUN wait#Z: #_W%s#Z) ", formatTime(deltaT));
 		}
-		return String.format("@%s, #_Wfinished#Z", gd.getAction() == 1 ? "#_RWORK#Z" : "#_GQUEST#Z");
+		return "";
+	}
+
+	private String getActionStatus() {
+		if (gd.action == 0) {
+			return "";
+		}
+		long deltaT = gd.actionCountdown - sysTime;
+		if (deltaT > 0) {
+			return String.format("[@%s, #_W%s#Z left] ", gd.action == 1 ? "#_RWORK#Z" : "#_GQUEST#Z", formatTime(deltaT));
+		}
+		return String.format("[@%s, #_Wfinished#Z] ", gd.action == 1 ? "#_RWORK#Z" : "#_GQUEST#Z");
+	}
+	
+	private String formatTime(long time) {
+		return String.format("%02d:%02d:%02d", time / 3600, time % 3600 / 60, time % 60);
 	}
 	
 	/**
@@ -124,10 +139,10 @@ public class Cli implements Commander {
 	@Override
 	public void print(String out) {
 		for (Ansi a : Ansi.values()) {
-			out = out.replaceAll("#" + a.toString(), color ? a.getEsc() : "");
+			out = out.replaceAll("#" + a.toString(), color ? a.esc : "");
 		}
 		if (color) {
-			out += Ansi.Z.getEsc();
+			out += Ansi.Z.esc;
 		}
 		
 		try {
